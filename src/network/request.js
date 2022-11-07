@@ -3,7 +3,7 @@ axios.defaults.withCredentials=true
 export function request(config) {
     // 1.创建axios的实例
     const instance = axios.create({
-        baseURL: 'http://117.33.159.219:18080',
+        baseURL: '/',
         timeout: 10000,
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
