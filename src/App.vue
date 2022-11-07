@@ -5,7 +5,7 @@
       <!--      <button @click="chartdata">查询</button>-->
       <home-page></home-page>
       <a-modal
-          title="         用户登陆"
+          title="用户登陆"
           centered
           :width="400"
           :visible="modalVisible"
@@ -53,7 +53,6 @@ export default {
     login() {
       request({
         url: '/api/user/login',
-        // url: '/user/login',
         method: 'get',
         params: {
           username: this.userName,
