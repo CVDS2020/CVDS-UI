@@ -62,7 +62,7 @@ export default {
         if (res.code == 0) {
           this.modalVisible = false;
           this.$router.replace('/dashboard');
-          alert('登陆成功！')
+          // alert('登陆成功！')
         }
       }).catch(err => {
         // console.log(err);
@@ -71,7 +71,14 @@ export default {
     },
   },
   created() {
-
+    let arr=[0,1,2,3,4,5,6,7,8];
+    delete arr[3];
+    console.log(arr.length)
+    console.log(arr)
+    delete arr[5]
+    let arr1 = arr.filter(d => d)
+    console.log(arr)
+    console.log(arr1)
   }
 }
 </script>

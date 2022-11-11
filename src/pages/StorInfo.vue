@@ -65,7 +65,7 @@
     <a-modal
         title="摄像头信息"
         centered
-        :width="900"
+        :width="800"
         :visible="modal1Visible"
         :closable="false"
     >
@@ -202,7 +202,7 @@
     <a-modal
         title="文件导出"
         centered
-        :width="900"
+        :width="800"
         :visible="modal2Visible"
         :closable="false"
     >

@@ -117,49 +117,55 @@ export default {
   data() {
     return {
       tableData,
-      filteredInfo: null,
+      // filteredInfo: null,
       sortedInfo: null,
     };
   },
   computed: {
     columns() {
-      let {sortedInfo, filteredInfo} = this;
-      sortedInfo = sortedInfo || {};
-      filteredInfo = filteredInfo || {};
+      // let {sortedInfo, /*filteredInfo*/} = this;
+      // sortedInfo = sortedInfo || {};
+      // filteredInfo = filteredInfo || {};
       const columns = [
         {
           title: '编号',
           dataIndex: 'number',
           key: 'number',
-          width: '70px'
+          width: '70px',
+          align:'center',
         },
         {
           title: '时间',
           dataIndex: 'time',
           key: 'time',
           width: '200px',
+          align:'center',
           sorter: (a, b) => a.time > b.time,
-          sortOrder: sortedInfo.columnKey === 'time' && sortedInfo.order,
+          // sortOrder: sortedInfo.columnKey === 'time' && sortedInfo.order,
         },
         {
           title: '用户',
           dataIndex: 'user',
-          key: 'user'
+          key: 'user',
+          align:'center',
         },
         {
           title: '授权终端',
           dataIndex: 'terminal',
-          key: 'terminal'
+          key: 'terminal',
+          align:'center',
         },
         {
           title: '操作',
           dataIndex: 'operation',
-          key: 'operation'
+          key: 'operation',
+          align:'center',
         },
         {
           title: '详细内容',
           dataIndex: 'content',
-          key: 'content'
+          key: 'content',
+          align:'center',
         },
       ]
       return columns;
@@ -175,8 +181,9 @@ export default {
     },
     handleChange(pagination, filters, sorter) {
       console.log('Various parameters', pagination, filters, sorter);
-      this.filteredInfo = filters;
+      // this.filteredInfo = filters;
       this.sortedInfo = sorter;
+      console.log("sortedInfo:",sorter)
     },
   }
 }

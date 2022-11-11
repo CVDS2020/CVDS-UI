@@ -5,9 +5,9 @@ export function request(config) {
     const instance = axios.create({
         baseURL: '/',
         timeout: 10000,
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        },
+        // headers: {
+        //     'Content-Type': 'application/x-www-form-urlencoded'
+        // },
         withcredentials: true, // 允许携带cookie
 
     })

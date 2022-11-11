@@ -15,17 +15,17 @@ const SysInfo = () => import('@/pages/SysInfo')
 Vue.use(VueRouter)
 // 2.创建VueRouter对象
 const routes = [
-    // {
-    //     path: '',
+    {
+        path: '',
     //     redirect: 'dashboard'
         // redirect: 'trainInfo'
-        // redirect: 'camInfo'
+        redirect: 'camInfo'
         // redirect: 'storInfo'
         // redirect: 'boardManage'
         // redirect: 'logInfo'
         // redirect: 'alarmInfo'
         // redirect: 'sysInfo'
-    // },
+    },
     {
         path: '/dashboard',
         component: Dashboard

@@ -10,12 +10,12 @@
           <span class="span height line-height">经度</span>
           <span class="span height line-height">纬度</span>
         </div>
-        <div class="container2" >
-          <a-input class="height space" disabled="true" value="G111" style="width: 200px;"></a-input>
-          <a-input class="height space" disabled="true" value="CRH380BL" style="width: 200px;"></a-input>
-          <a-input class="height space" disabled="true" value="8" style="width: 200px;"></a-input>
-          <a-input class="height space" disabled="true" value="116.345345345" style="width: 200px;"></a-input>
-          <a-input class="height space" disabled="true" value="37.345345345" style="width: 200px;"></a-input>
+        <div class="container2">
+          <a-input class="height space input" disabled="true" v-model="trainNo"></a-input>
+          <a-input class="height space input" disabled="true" v-model="model"></a-input>
+          <a-input class="height space input" disabled="true" v-model="trainNo"></a-input>
+          <a-input class="height space input" disabled="true" v-model="longitude"></a-input>
+          <a-input class="height space input" disabled="true" v-model="latitude"></a-input>
         </div>
         <div class="container2 direction">
           <span class="height line-height">（北纬）</span>
@@ -27,8 +27,39 @@
 </template>
 
 <script>
+import {request} from "@/network/request";
 export default {
-  name: "TrainInfo"
+  name: "TrainInfo",
+  data() {
+    return {
+      trainNo: '001',
+      model: '复兴号',
+      carriageNum: 8,
+      longitude: 0,
+      latitude: 0
+    }
+  },
+  methods: {
+
+    getTrainInfo() {
+      request({
+        url: '/api/train/get',
+      }).then(res => {
+        if (res.code == 0) {
+          this.trainNo = res.data.trainNo;
+          this.model = res.data.model;
+          this.carriageNum = res.data.carriageNum;
+          this.longitude = res.data.longitude;
+          this.latitude = res.data.latitude;
+        }
+      }).catch(err=>{
+
+      })
+    }
+  },
+  created() {
+    this.getTrainInfo()
+  }
 }
 </script>
 
@@ -47,18 +78,26 @@ export default {
   display: flex;
   margin: 0 15px 0 60px
 }
-.height{
+
+.height {
   height: 40px;
-  margin:3px 0 3px 0;
+  margin: 3px 0 3px 0;
 }
-.line-height{
+
+.line-height {
   line-height: 40px;
 }
-.direction{
+
+.direction {
   flex-direction: column-reverse;
 }
-.space{
+
+.space {
   margin-left: 10px;
+}
+
+.input {
+  width: 200px;
 }
 
 </style>
