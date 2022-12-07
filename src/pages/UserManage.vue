@@ -1,10 +1,14 @@
 <template>
-<div>用户管理</div>
+  <page-title title="用户管理"></page-title>
 </template>
 
 <script>
+import PageTitle from "@/components/PageTitle";
 export default {
-  name: "UserManage"
+  name: "UserManage",
+  components:{
+    PageTitle,
+  },
 }
 </script>
 

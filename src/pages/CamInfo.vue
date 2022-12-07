@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div>摄像头信息</div>
+    <page-title title="摄像头信息"></page-title>
     <a-card class="card">
       <a-row class="">
         <a-col :span="2" class="left-txt">车厢号：</a-col>
@@ -104,13 +104,20 @@
       <template #operation="value,record,index">
         <div>
           <img class="img" src="../assets/img/icon-view-cam-info.png" alt=""
-               @click="onQueryDevImgClicked(record,index)">
+               @click="onCamInfoImgClicked(value,record,index)">
           <img class="img" src="../assets/img/icon-conf-cam-info.png" alt=""
-               @click="onCofingVedioConfigImgClicked(record,index)">
-          <img v-if="record.onlineText==='在线'" class="img" src="../assets/img/icon-power-on.png" alt=""
-               @click="">
-          <img v-else-if="record.onlineText==='离线'" class="img" src="../assets/img/icon-power-off.png" alt=""
-               @click="">
+               @click="onVideoConfigImgClicked(value,record,index)">
+          <a-popconfirm
+              title="请选择重启或关闭"
+              ok-text="关闭"
+              cancel-text="重启"
+              @confirm="onRemoteCtrlClicked(value,record,index,0)"
+              @cancel="onRemoteCtrlClicked(value,record,index,1)"
+              :disabled="record.onlineText==='离线'"
+          >
+            <img v-if="record.onlineText==='在线'" class="img" src="../assets/img/icon-power-on.png" alt="">
+            <img v-else-if="record.onlineText==='离线'" class="img" src="../assets/img/icon-power-off.png" alt="">
+          </a-popconfirm>
         </div>
       </template>
       <!--      <template #name="{ record }">              //:data数据-->
@@ -196,7 +203,7 @@
         </a-row>
       </div>
       <template #footer>
-        <button class="modal-footer-btn" @click="onAddModalClean">清空</button>
+        <button class="modal-footer-btn" @click="onModalClean">清空</button>
         <button class="modal-footer-btn" @click="onAddModalCancel">取消</button>
         <button class="modal-footer-btn" style="background-color:green" @click="onAddModalConfirm">确定</button>
       </template>
@@ -206,7 +213,7 @@
         title="摄像头信息"
         centered
         :width="800"
-        :visible="camInfoModalVisiable"
+        :visible="camInfoModalVisible"
         :closable="false"
     >
       <div>
@@ -257,7 +264,7 @@
           <a-col :span="7">
             <a-select
                 class="select"
-                :value="vedioConfig.encoder"
+                :value="videoConfig.encoder"
                 disabled
             />
           </a-col>
@@ -265,7 +272,7 @@
           <a-col :span="7">
             <a-select
                 class="select"
-                :value="vedioConfig.width+'*'+vedioConfig.height"
+                :value="videoConfig.width+'*'+videoConfig.height"
                 disabled
             />
           </a-col>
@@ -280,10 +287,10 @@
               <a-col :span="3"></a-col>
               <a-col :span="4" class="progress-left-txt">亮度：</a-col>
               <a-col :span="13">
-                <a-progress :percent="vedioConfig.brightness" size="small" :showInfo="false"/>
+                <a-progress :percent="videoConfig.brightness" size="small" :showInfo="false"/>
               </a-col>
               <a-col :span="4">
-                <a-input disabled="true" value="30" class="percent-text"></a-input>
+                <a-input disabled="true" :value="videoConfig.brightness" class="percent-text"></a-input>
               </a-col>
             </a-row>
 
@@ -291,10 +298,10 @@
               <a-col :span="3"></a-col>
               <a-col :span="4" class="progress-left-txt">对比：</a-col>
               <a-col :span="13">
-                <a-progress :percent="vedioConfig.contrast" size="small" :showInfo="false"/>
+                <a-progress :percent="videoConfig.contrast" size="small" :showInfo="false"/>
               </a-col>
               <a-col :span="4">
-                <a-input disabled="true" value="50" class="percent-text"></a-input>
+                <a-input disabled="true" :value="videoConfig.contrast" class="percent-text"></a-input>
               </a-col>
             </a-row>
 
@@ -302,10 +309,10 @@
               <a-col :span="3"></a-col>
               <a-col :span="4" class="progress-left-txt">饱和度：</a-col>
               <a-col :span="13">
-                <a-progress :percent="vedioConfig.saturation" size="small" :showInfo="false"/>
+                <a-progress :percent="videoConfig.saturation" size="small" :showInfo="false"/>
               </a-col>
               <a-col :span="4">
-                <a-input disabled="true" value="70" class="percent-text"></a-input>
+                <a-input disabled="true" :value="videoConfig.saturation" class="percent-text"></a-input>
               </a-col>
             </a-row>
           </div>
@@ -320,85 +327,85 @@
         title="视频图像设置"
         centered
         :width="800"
-        :visible="videoConfigModalVisiable"
+        :visible="videoConfigModalVisible"
         :closable="false"
     >
       <div>
-        <a-row>
-          <a-col :span="5"><span>视频编码</span></a-col>
+        <a-row class="card-item">
+          <a-col :span="5" class="left-txt">视频编码：</a-col>
           <a-col :span="7">
-            <a-select class="select" default-value="H.264">
-              <a-select-option value="H.264">
-                H.264
-              </a-select-option>
-              <a-select-option value="H.265">
-                H.265
-              </a-select-option>
-            </a-select>
+            <a-select
+                class="select"
+                :value="videoConfig.encoder"
+            />
           </a-col>
-          <a-col :span="5">分辨率</a-col>
+          <a-col :span="5" class="left-txt">分辨率：</a-col>
           <a-col :span="7">
-            <a-select class="select" default-value="1920*1080(1080P)">
-              <a-select-option value="1920*1080(1080P)">
-                1920*1080(1080P)
-              </a-select-option>
-              <a-select-option value="390*844">
-                390*844
-              </a-select-option>
-            </a-select>
+            <a-select
+                class="select"
+                :value="videoConfig.width+'*'+videoConfig.height"
+            />
           </a-col>
         </a-row>
+
         <div style="margin-top: 30px">
-          <div style="">画面设置</div>
-          <a-card>
-            <a-row>
-              <a-col :span="5"></a-col>
-              <a-col :span="4"><span>亮度</span></a-col>
-              <a-col :span="11">
-                <progress-bar :percent="70" :show-slider="true" :show-per-text="false"></progress-bar>
+          <div
+              style="border: 1px solid #e6e6e6;border-radius: 3px;text-align:center;background: #e6e6e6;position: relative;top: 15px;left: 50px;width: 80px;height: 30px;padding-top:5px">
+            画面设置：
+          </div>
+          <div style="border: 1px solid #e6e6e6;border-radius: 3px">
+            <a-row class="card-item" style="margin-top: 30px">
+              <a-col :span="3"></a-col>
+              <a-col :span="4" class="progress-left-txt">亮度：</a-col>
+              <a-col :span="13">
+                <progress-bar :percent="videoConfig.brightness" :show-slider="true" :show-per-text="false"
+                              @percentChange="onBrightnessPercentChange"/>
               </a-col>
               <a-col :span="4">
-                <a-input value="30"></a-input>
+                <a-input disabled="true" :value="videoConfig.brightness" class="percent-text"></a-input>
               </a-col>
             </a-row>
 
-            <a-row>
-              <a-col :span="5"></a-col>
-              <a-col :span="4"><span>对比</span></a-col>
-              <a-col :span="11">
-                <progress-bar :percent="70" :show-slider="true" :show-per-text="false"></progress-bar>
+            <a-row class="card-item">
+              <a-col :span="3"></a-col>
+              <a-col :span="4" class="progress-left-txt">对比：</a-col>
+              <a-col :span="13">
+                <progress-bar :percent="videoConfig.contrast" :show-slider="true" :show-per-text="false"
+                              @percentChange="onContrastPercentChange"/>
               </a-col>
               <a-col :span="4">
-                <a-input value="50"></a-input>
+                <a-input disabled="true" :value="videoConfig.contrast" class="percent-text"></a-input>
               </a-col>
             </a-row>
 
-            <a-row>
-              <a-col :span="5"></a-col>
-              <a-col :span="4"><span>饱和度</span></a-col>
-              <a-col :span="11">
-                <progress-bar :percent="70" :show-slider="true" :show-per-text="false"></progress-bar>
+            <a-row class="card-item">
+              <a-col :span="3"></a-col>
+              <a-col :span="4" class="progress-left-txt">饱和度：</a-col>
+              <a-col :span="13">
+                <progress-bar :percent="videoConfig.saturation" :show-slider="true" :show-per-text="false"
+                              @percentChange="onSaturationPercentChange"/>
               </a-col>
               <a-col :span="4">
-                <a-input value="70"></a-input>
+                <a-input disabled="true" :value="videoConfig.saturation" class="percent-text"></a-input>
               </a-col>
             </a-row>
-
+            <a-col :span="19"></a-col>
+            <a-col :span="5">
+              <button style="margin: 30px 0 20px 0;border:1px solid #e6e6e6;border-radius: 3px;width: 90px;height: 35px"
+                      @click="onDefaultValueBtnClicked">恢复默认值
+              </button>
+            </a-col>
             <a-row>
-              <a-col :span="19"></a-col>
-              <a-col :span="3">
-                <a-button>恢复默认值</a-button>
-              </a-col>
-              <a-col :span="2"></a-col>
-            </a-row>
 
-          </a-card>
+            </a-row>
+          </div>
         </div>
+
       </div>
       <template #footer>
-        <a-button @click="modal4Visible=false">重置</a-button>
-        <a-button @click="modal4Visible=false">取消</a-button>
-        <a-button @click="modal4Visible=false">确定</a-button>
+        <a-button @click="onVideoConfigResetBtnClicked">重置</a-button>
+        <a-button @click="onVideoConfigCancelBtnClicked">取消</a-button>
+        <a-button @click="onVideoConfigConfirmBtnClicked">确定</a-button>
       </template>
     </a-modal>
   </div>
@@ -407,6 +414,7 @@
 <script>
 import {request} from "@/network/request";
 import ProgressBar from "@/components/ProgressBar";
+import PageTitle from "@/components/PageTitle";
 
 function isNotEmpty(param) {
   return param && param != ''
@@ -464,7 +472,7 @@ const columns = [
     dataIndex: 'onlineText',
     align: 'center',
     scopedSlots: {customRender: 'onlineText'},
-    sorter: (a, b) => a.online - b.online,
+    sorter: (a, b) => a.onlineText > b.onlineText,
   },
   {
     title: '监视物状态',
@@ -605,6 +613,7 @@ export default {
   name: "CamInfo",
   components: {
     ProgressBar,
+    PageTitle
   },
   data() {
     return {
@@ -613,24 +622,24 @@ export default {
       modalTitle: '',
       addModalVisible: false,
       popconfirmVisiable: false,
-      camInfoModalVisiable: false,
-      videoConfigModalVisiable: false,
+      camInfoModalVisible: false,
+      videoConfigModalVisible: false,
       isAllActive: true,
       isOnlineActive: false,
       isOfflineActive: false,
       /*   /api/device/query/devices请求参数    start   */
       page: 1,
       count: 10,
-      keyword: null,
+      keyword: undefined,
       online: true,
-      inputCarriageNo: null,
+      inputCarriageNo: undefined,
       selectedSuperviseType: {name: ''},
       isOnlineHasNextPage: true,
       isOffLineHasNextPage: true,
       /*   /api/device/query/devices请求参数    end   */
       superviseTypeList: [{type: 4, name: '受电弓'}, {type: 5, name: '转向架'}, {type: 6, name: '车厢'}],
       selectedRowRadioKeys: [],//所选中checkbox、radio的key
-      sortedInfo: null,
+      sortedInfo: undefined,
       //添加摄像头相关数据
       superviseList: [{name: '受电弓1', carriageNo: 1, id: 1}, {name: '受电弓2', carriageNo: 2, id: 2}, {
         name: '受电弓3',
@@ -648,14 +657,15 @@ export default {
         carriageNo: '',//所在车厢
         deviceId: undefined
       },
-      vedioConfig: {
+      videoConfig: {
         encoder: 'H.264',
         width: 1920,
         height: 1080,
-        brightness: 70,
-        contrast: 50,
-        saturation: 30
-      }
+        brightness: 70,//亮度
+        contrast: 50,//对比度
+        saturation: 30//饱和度
+      },
+      tempVideoConfig: {},
     }
   },
   methods: {
@@ -671,7 +681,7 @@ export default {
 
       })
     },
-    getDevices() {
+    getDevicesTableData() {
       //判断后端是否有新数据，无新数据则不进行网络请求
       if (this.online && !this.isOnlineHasNextPage) {
         return;
@@ -685,14 +695,14 @@ export default {
       params.page = this.page;
       params.count = this.count;
       //非必传参数
-      if (this.keyword) {
+      if (isNotEmpty(this.keyword)) {
         params.keyword = this.keyword;
       }
       params.online = this.online;
-      if (this.inputCarriageNo) {
+      if (isNotEmpty(this.inputCarriageNo)) {
         params.carriageNO = this.inputCarriageNo;
       }
-      if (this.selectedSuperviseType.type) {
+      if (isNotEmpty(this.selectedSuperviseType.type)) {
         params.superviseTargetType = this.selectedSuperviseType.type;
       }
       request({
@@ -711,7 +721,7 @@ export default {
                 this.isOfflineHasNextPage = resData.hasNextPage;
               }
               for (let i = 1; i <= len; i++) {
-                const info = res.data[i - 1];
+                const info = resTableData[i - 1];
                 info.model = '';//表格zhong需要显示该内容
                 info.operation = '';
                 if (info.online == 0) {
@@ -759,7 +769,7 @@ export default {
       this.count = 10;
       this.isOnlineHasNextPage = true;
       this.isOffLineHasNextPage = true;
-      this.getDevices();
+      this.getDevicesTableData();
     },
     onSelectRadioChange(selectedRowKeys) {
       this.selectedRowRadioKeys = selectedRowKeys;
@@ -779,30 +789,45 @@ export default {
       this.add.carriageNo = this.tableData[selectedRowRadioKey - 1].carriageNo;//select显示用 //网络请求参数
       this.add.deviceId = this.tableData[selectedRowRadioKey - 1].deviceId;//select显示用 //网络请求路径
     },
-    setAddVedioConfig(){
-      this.add.addInputName = this.tableData[selectedRowRadioKey - 1].name;//input显示用 //网络请求参数
-      this.add.addInputIp = this.tableData[selectedRowRadioKey - 1].ip;//input显示用 //网络请求参数
-      this.add.addInputPosition = this.tableData[selectedRowRadioKey - 1].position;//input显示用 //网络请求参数
-      this.add.superviseTargetType = this.tableData[selectedRowRadioKey - 1].superviseTargetType;//网络请求参数
-      this.add.superviseTargetTypeName = this.tableData[selectedRowRadioKey - 1].superviseTargetTypeName;//select显示用
-      this.add.superviseTargetId = this.tableData[selectedRowRadioKey - 1].superviseTargetId//网络请求参数
-      this.add.superviseTargetName = this.tableData[selectedRowRadioKey - 1].superviseTargetName//select显示用
-      this.add.carriageNo = this.tableData[selectedRowRadioKey - 1].carriageNo;//select显示用 //网络请求参数
-      this.add.deviceId = this.tableData[selectedRowRadioKey - 1].deviceId;//select显示用 //网络请求路径
-      this.vedioConfig.encoder='';
-      this.vedioConfig.width='';
-      this.vedioConfig.height='';
-      this.vedioConfig.brightness='';
-      this.vedioConfig.contrast='';
-      this.vedioConfig.saturation='';
+    setAddVideoConfig(resData) {
+      if (!resData) {
+        return;
+      }
+      // /api/device/query/devices/{deviceId}
+      if (isNotEmpty(resData.name)) this.add.addInputName = resData.name;//input显示用 //网络请求参数
+      if (isNotEmpty(resData.ip)) this.add.addInputIp = resData.ip;//input显示用 //网络请求参数
+      if (isNotEmpty(resData.position)) this.add.addInputPosition = resData.position;//input显示用 //网络请求参数
+      if (isNotEmpty(resData.superviseTargetType)) this.add.superviseTargetType = resData.superviseTargetType;//网络请求参数
+      if (isNotEmpty(resData.superviseTargetTypeName)) this.add.superviseTargetTypeName = resData.superviseTargetTypeName;//select显示用
+      if (isNotEmpty(resData.superviseTargetId)) this.add.superviseTargetId = resData.superviseTargetId//网络请求参数
+      if (isNotEmpty(resData.superviseTargetName)) this.add.superviseTargetName = resData.superviseTargetName//select显示用
+      if (isNotEmpty(resData.carriageNo)) this.add.carriageNo = resData.carriageNo;//select显示用 //网络请求参数
+      if (isNotEmpty(resData.deviceId)) this.add.deviceId = resData.deviceId;//select显示用 //网络请求路径
+      if (resData.videoConfig) {
+        if (isNotEmpty(resData.videoConfig.encoder)) this.videoConfig.encoder = resData.videoConfig.encoder;
+        if (isNotEmpty(resData.videoConfig.width)) this.videoConfig.width = resData.videoConfig.width;
+        if (isNotEmpty(resData.videoConfig.height)) this.videoConfig.height = resData.videoConfig.height;
+        if (isNotEmpty(resData.videoConfig.brightness)) this.videoConfig.brightness = resData.videoConfig.brightness;
+        if (isNotEmpty(resData.videoConfig.contrast)) this.videoConfig.contrast = resData.videoConfig.contrast;
+        if (isNotEmpty(resData.videoConfig.saturation)) this.videoConfig.saturation = resData.videoConfig.saturation;
+      }
+
+      // /api/device/query/videoConfig/{deviceId}
+      if (isNotEmpty(resData.encoder)) this.videoConfig.encoder = resData.encoder;
+      if (isNotEmpty(resData.width)) this.videoConfig.width = resData.width;
+      if (isNotEmpty(resData.height)) this.videoConfig.height = resData.height;
+      if (isNotEmpty(resData.brightness)) this.videoConfig.brightness = resData.brightness;
+      if (isNotEmpty(resData.contrast)) this.videoConfig.contrast = resData.contrast;
+      if (isNotEmpty(resData.saturation)) this.videoConfig.saturation = resData.saturation;
+      console.log('======', this.add, this.videoConfig)
     },
     //主页面"监视物类型"select
     onSelectChange(index, option) {
       this.selectedSuperviseType = this.superviseTypeList[index];
     },
     onResetClicked() {
-      this.inputCarriageNo = null;
-      this.keyword = null;
+      this.inputCarriageNo = undefined;
+      this.keyword = undefined;
       this.selectedSuperviseType = {name: ''};
       this.changeBtnAcive(-1);
     },
@@ -826,7 +851,7 @@ export default {
     /**
      * 将this.add{}和selectedRowRadioKeys重置
      */
-    onAddModalClean() {
+    onModalClean() {
       this.add.addInputName = '';
       this.add.addInputIp = '';
       this.add.addInputPosition = '';
@@ -837,10 +862,17 @@ export default {
       this.add.carriageNo = '';
       this.add.deviceId = undefined;
 
+      this.videoConfig.encoder = '';
+      this.videoConfig.width = 0;
+      this.videoConfig.height = 0;
+      this.videoConfig.brightness = 0;
+      this.videoConfig.contrast = 0;
+      this.videoConfig.saturation = 0;
+
       this.selectedRowRadioKeys = [];//清空radio
     },
     onAddModalCancel() {
-      this.onAddModalClean();
+      this.onModalClean();
       this.addModalVisible = false;
     },
     onAddModalConfirm() {
@@ -872,11 +904,11 @@ export default {
 
         })
       } else {
-        alert('IP不能为空！')
+        this.$message.warn('IP不能为空！')
       }
     },
     onQueryClicked() {
-      this.getDevices();
+      this.getDevicesTableData();
     },
     changeBtnAcive(online) {
       if (online == -1) {
@@ -901,7 +933,7 @@ export default {
           this.setAdd();
           this.addModalVisible = true;
         } else if (this.selectedRowRadioKeys.length == 0) {
-          alert('请选择一个设备')
+          this.$message.warn('请选择一个设备')
         }
       } else if (title === '添加摄像头') {
         this.addModalVisible = true;
@@ -909,7 +941,7 @@ export default {
     },
     onDeleteBtnClicked() {
       if (this.selectedRowRadioKeys.length == 0) {
-        alert('请选择一个设备')
+        this.$message.warn('请选择一个设备!')
       } else {
         this.popconfirmVisiable = true;
       }
@@ -923,48 +955,108 @@ export default {
           method: 'delete',
         }).then(res => {
           if (res.code == 200) {
-            this.onAddModalClean();
+            this.onModalClean();
             this.refreshTable();
           }
         }).catch(err => {
-          this.onAddModalClean();
+          this.onModalClean();
         })
       }
       this.popconfirmVisiable = false;
     },
     onDeleteCancel() {
       this.popconfirmVisiable = false;
-      this.onAddModalClean();
+      this.onModalClean();
     },
+
     onRefreshBtnClicked() {
       this.selectedRowRadioKeys = [];
       this.onAddModalCancel();
       this.refreshTable()
     },
-    showModal3() {
-      this.modal3Visible = true
-    },
-    showModal4() {
-      this.modal4Visible = true
-    },
 
-    onQueryDevImgClicked(record, index) {
-      this.camInfoModalVisiable = true;
-      this.selectedRowRadioKeys[0] = index + 1;
-      this.setAdd();
-      console.log('value:', value)
-      console.log('record', record)
-      console.log('index', index);
+    onCamInfoImgClicked(value, record, index) {
+      this.camInfoModalVisible = true;
+      request({
+        url: '/api/device/query/devices/' + record.deviceId
+      }).then(res => {
+        if (res.code == 0) {
+          this.setAddVideoConfig(res.data)
+        }
+      }).catch(err => {
+      })
     },
     onCamInfoBtnClicked() {
-      this.camInfoModalVisiable = false;
-
-    },
-    onCofingVedioConfigImgClicked(record, index) {
-      this.selectedRowRadioKeys[0] = index + 1;
-      this.setAdd();
+      this.camInfoModalVisible = false;
+      this.onModalClean()
     },
 
+    onVideoConfigImgClicked(value, record, index) {
+      this.videoConfig.encoder = 'H.264';
+      this.videoConfig.width = 1920;
+      this.videoConfig.height = 1080;
+      this.videoConfig.brightness = 50;
+      this.videoConfig.contrast = 50;
+      this.videoConfig.saturation = 50;
+      this.videoConfigModalVisible = true;
+    },
+    onRemoteCtrlClicked(value, record, index, flag) {
+      let url = '';
+      if (flag == 0) {
+        url = '/api/device/control/closeboot/' + record.deviceId;
+      } else if (flag == 1) {
+        url = '/api/device/control/teleboot/' + record.deviceId;
+      }
+      request({
+        url,
+      }).then(res => {
+        if (res.code == 0) {
+          this.onAddModalCancel();
+          this.refreshTable();
+        }
+      }).catch(err => {
+      })
+    },
+    onBrightnessPercentChange(per) {
+      this.videoConfig.brightness = per;
+    },
+    onContrastPercentChange(per) {
+      this.videoConfig.contrast = per;
+    },
+    onSaturationPercentChange(per) {
+      this.videoConfig.saturation = per;
+    },
+    onDefaultValueBtnClicked() {
+      this.app.deviceId = record.deviceId;
+      request({
+        url: '/api/device/query/videoConfig/' + record.deviceId,
+      }).then(res => {
+        if (res.code == 0) {
+          this.setAddVideoConfig(res.data)
+        }
+      }).catch(err => {
+      })
+    },
+    onVideoConfigCancelBtnClicked() {
+      this.onModalClean();
+      this.videoConfigModalVisible = false;
+    },
+    onVideoConfigResetBtnClicked() {
+      this.$message.error('接口暂未确定')
+      // request({
+      //   url: '/api/device/query/devices/' + record.deviceId + '/update',....
+      //   method:'post',
+      //   params:{}
+      // }).then(res => {
+      //   if (res.code == 0) {
+      //     //todo
+      //   }
+      // }).catch(err => {
+      // })
+    },
+    onVideoConfigConfirmBtnClicked() {
+      this.onVideoConfigResetBtnClicked()
+    },
   },
   computed: {},
   created() {
@@ -1028,7 +1120,8 @@ export default {
 }
 
 .active {
-  color: #158BCD;
+  background-color: #158BCD;
+  color: white;
 }
 
 .percent-text {

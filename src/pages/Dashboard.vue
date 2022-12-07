@@ -218,11 +218,11 @@ export default {
           this.storageUsedCapacity = res.data.storageUsedCapacity;
           this.storageFreeCapacity = res.data.storageCapacity - res.data.storageUsedCapacity;
         } else {
-          alert("数据请求失败!")
+          this.$message.warn('数据请求失败');
         }
       }).catch(err => {
         // console.log(err);
-        alert("数据请求失败")
+        this.$message.warn('数据请求失败')
       })
     },
     getLastAlarm() {
@@ -248,8 +248,8 @@ export default {
     },
   },
   created() {
-    this.getStatistics()
-    this.getLastAlarm()
+    // this.getStatistics()
+    // this.getLastAlarm()
   }
 
 }

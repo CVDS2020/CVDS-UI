@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div>日志信息</div>
+    <page-title title="日志信息"></page-title>
     <a-tabs type="card" @change="callback">
       <a-tab-pane key="1" tab="系统日志">
         <sys-log/>
@@ -13,8 +13,9 @@
 </template>
 
 <script>
-import SysLog from "@/pages/SysLog"
+import SysLog from "@/pages/SysLog";
 import OperationLog from "@/pages/OperationLog";
+import PageTitle from "@/components/PageTitle"
 
 export default {
   name: "LogInfo",
@@ -23,7 +24,8 @@ export default {
   },
   components: {
     SysLog,
-    OperationLog
+    OperationLog,
+    PageTitle
   },
   methods: {
     callback(key) {

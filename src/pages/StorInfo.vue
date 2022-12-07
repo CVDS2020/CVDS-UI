@@ -1,209 +1,191 @@
 <template>
   <div>
-    <div>存储信息</div>
-    <a-button>存储配置</a-button>
+    <page-title title="存储信息"></page-title>
+    <a-button style="margin-bottom: 20px;background-color: orange;color: white" @click="onStorConfBtnClicked">存储配置
+    </a-button>
     <a-card>
       <a-row>
-        <a-col :span="2"><span>磁盘号：</span></a-col>
+        <a-col :span="2" class="left-txt">磁盘号：</a-col>
         <a-col :span="3">
-          <a-select class="select" default-value="disk1">
-            <a-select-option value="disk1">
-              disk1
-            </a-select-option>
-            <a-select-option value="disk2">
-              disk2
+          <a-select
+              :value="diskNo"
+              class="select"
+              @change="onDiskNoSelectChange">
+            <!--:key只能绑定string，number.不能绑定对象  :value可以绑定对象-->
+            <a-select-option
+                v-for="(item,index) of diskNoList"
+                :key="index"
+            >
+              {{ item }}
             </a-select-option>
           </a-select>
         </a-col>
-        <a-col :span="2"><span>状态：</span></a-col>
+        <a-col :span="2" class="left-txt">状态：</a-col>
         <a-col :span="6">
-          <a-button type="primary">全部</a-button>
-          <a-button>正常</a-button>
-          <a-button>故障</a-button>
+          <a-button :class="{btn:true,btn1:statusAll}" @click="changeBtnAcive(0,'')">全部</a-button>
+          <a-button :class="{btn:true,btn1:statusNormal}" @click="changeBtnAcive(0,0)">正常</a-button>
+          <a-button :class="{btn:true,btn1:statusTrouble}" @click="changeBtnAcive(0,1)">故障</a-button>
         </a-col>
-        <a-col :span="2">类型：</a-col>
+        <a-col :span="2" class="left-txt">类型：</a-col>
         <a-col :span="6">
-          <a-button type="primary">全部</a-button>
-          <a-button>本地</a-button>
-          <a-button>外接USB</a-button>
+          <a-button :class="{btn:true,btn1:typeAll}" @click="changeBtnAcive(1,'')">全部</a-button>
+          <a-button :class="{btn:true,btn1:typeLocal}" @click="changeBtnAcive(1,0)">本地</a-button>
+          <a-button :class="{btn:true,btn1:typeExternal}" @click="changeBtnAcive(1,1)">外接USB</a-button>
         </a-col>
         <a-col :span="3">
-          <a-button>重置</a-button>
+          <a-button @click="resetBtnClicked">重置</a-button>
         </a-col>
       </a-row>
-      <a-row>
+      <a-row class="card-item">
         <a-col :span="21"></a-col>
         <a-col :span="3">
-          <a-button>查询</a-button>
+          <a-button @click="test">查询</a-button>
         </a-col>
       </a-row>
     </a-card>
-    <div><span>磁盘空间列表[共</span><span>3</span><span>条]</span></div>
-    <a-table :columns="columns" :data-source="tableData" bordered>
-
-      <template #operation="{record}">
+    <a-row class="table-title">
+      <a-col :span="4"><span>磁盘空间列表[共{{ tableData.length }}条]</span></a-col>
+    </a-row>
+    <a-table
+        :columns="columns"
+        :data-source="tableData"
+        bordered
+        @change="onPaginationClicked"
+        :pagination="pagination">
+      <template #operation="value,record,index">
         <div>
-          <img class="img" src="../assets/img/icon-view-cam-info.png" alt="" @click="setModal1Visible">
-          <img class="img" src="../assets/img/icon-export.png" alt="" @click="setModal2Visible">
-          <a-popconfirm
-              placement="bottomRight"
-              ok-text="确定"
-              cancel-text="取消"
-              @confirm="confirm">
-            <template #title>
-              <p>是否格式化当前USB磁盘</p>
-            </template>
-            <img class="img" src="../assets/img/icon-external.png" alt="" @click="showConfirm">
-<!--            <button class="btn" style="background-color: gray "><img class="btn-icon" src="../assets/img/icon-btn-delete.png" alt="">删除</button>-->
-
-          </a-popconfirm>
-
+          <a-row>
+            <a-col :span="3"></a-col>
+            <a-col :span="6">
+              <img class="img" src="../assets/img/icon-view-cam-info.png" alt="" @click="showMessage('内容未确定')">
+            </a-col>
+            <a-col :span="6">
+              <img style="width: 25px;height: 25px" src="../assets/img/icon-export.png" alt=""
+                   @click="downloadRecordModalVisible=true">
+            </a-col>
+            <a-col :span="6">
+              <a-popconfirm
+                  placement="bottomRight"
+                  ok-text="确定"
+                  cancel-text="取消"
+                  @confirm="initDisk(value,record,index)">
+                <template #title>
+                  <p>是否格式化当前USB磁盘</p>
+                </template>
+                <img v-show="record.type==1" class="img" src="../assets/img/icon-external.png" alt="" @click="">
+              </a-popconfirm>
+            </a-col>
+            <a-col :span="3"></a-col>
+          </a-row>
         </div>
       </template>
     </a-table>
+    <!--存储配置modal-->
+    <a-modal
+        title="存储配置"
+        centered
+        :width="800"
+        :visible="storageConfigModalVisible"
+        :closable="false"
+    >
+      <a-row>
+        <a-col :span="1"></a-col>
+        <a-col :span="4" class="left-txt">文件保存间隔：</a-col>
+        <a-col :span="4">
+          <a-select
+              :value="saveInterval+'分钟'"
+              class="select"
+              @change="onSaveIntervalSelectChange">
+            <!--:key只能绑定string，number.不能绑定对象  :value可以绑定对象-->
+            <a-select-option
+                v-for="(item,index) of saveIntervalList"
+                :key="index"
+            >
+              {{ item }}
+            </a-select-option>
+          </a-select>
+        </a-col>
+      </a-row>
+      <a-row style="margin-top: 20px">
+        <a-col :span="1"></a-col>
+        <a-col :span="4" class="left-txt">文件保存位置：</a-col>
+        <a-col :span="4">
+          <a-select :value="saveDirectory" class="select"/>
 
+          <a-select
+              :value="saveDirectory"
+              class="select"
+              @change="onSaveDirectorySelectChange">
+            <!--:key只能绑定string，number.不能绑定对象  :value可以绑定对象-->
+            <a-select-option
+                v-for="(item,index) of saveDirectoryList"
+                :key="index"
+            >
+              {{ item }}
+            </a-select-option>
+          </a-select>
+        </a-col>
+      </a-row>
+
+      <div style="margin-top: 30px">
+        <div
+            style="border: 1px solid #e6e6e6;border-radius: 3px;text-align:center;background: #e6e6e6;position: relative;top: 12px;left: 50px;width: 80px;height: 30px;padding-top:5px">
+          保存天数：
+        </div>
+        <div class="box">
+          <a-row type="flex" justify="center">
+            <a-col :span="7"></a-col>
+            <a-col :span="3" class="left-txt">受电弓：</a-col>
+            <a-col :span="2">
+              <div class="border">{{ saveDurationPantograph }}</div>
+            </a-col>
+            <a-col :span="3" class="right-txt">天</a-col>
+            <a-col :span="9"></a-col>
+          </a-row>
+          <a-row type="flex" justify="center" style="margin-top: 10px">
+            <a-col :span="7"></a-col>
+            <a-col :span="3" class="left-txt">车厢：</a-col>
+            <a-col :span="2">
+              <div class="border">{{ saveDurationCarriage }}</div>
+            </a-col>
+            <a-col :span="3" class="right-txt">天</a-col>
+            <a-col :span="9"></a-col>
+          </a-row>
+          <a-row type="flex" justify="center" style="margin-top: 10px">
+            <a-col :span="7"></a-col>
+            <a-col :span="3" class="left-txt">板卡：</a-col>
+            <a-col :span="2">
+              <div class="border">{{ saveDurationCard }}</div>
+            </a-col>
+            <a-col :span="3" class="right-txt">天</a-col>
+            <a-col :span="9"></a-col>
+          </a-row>
+        </div>
+      </div>
+      <template #footer>
+        <a-button @click="onStorageConfigResetBtnClicked('未找到相关update接口')">重置</a-button>
+        <a-button @click="storageConfigModalVisible=false">取消</a-button>
+        <a-button @click="onStorageConfigConfirmBtnClicked">确定</a-button>
+      </template>
+    </a-modal>
+    <!--内容未确定-->
     <a-modal
         title="摄像头信息"
         centered
         :width="800"
-        :visible="modal1Visible"
+        :visible="false"
         :closable="false"
     >
-      <div>
-        <a-row>
-          <a-col :span="5"><span>摄像头名称</span></a-col>
-          <a-col :span="7">
-            <a-input></a-input>
-          </a-col>
-          <a-col :span="5">监视物类型</a-col>
-          <a-col :span="7">
-            <a-select class="select" default-value="受电弓">
-              <a-select-option value="受电弓">
-                受电弓
-              </a-select-option>
-              <a-select-option value="转向架">
-                转向架
-              </a-select-option>
-              <a-select-option value="车厢">
-                车厢
-              </a-select-option>
-            </a-select>
-          </a-col>
-        </a-row>
-
-        <a-row>
-          <a-col :span="5"><span>所在车厢</span></a-col>
-          <a-col :span="7">
-            <a-select class="select" default-value="1">
-              <a-select-option value="1">
-                1号车厢
-              </a-select-option>
-              <a-select-option value="2">
-                2号车厢
-              </a-select-option>
-            </a-select>
-          </a-col>
-          <a-col :span="5">监视物</a-col>
-          <a-col :span="7">
-            <a-select class="select" default-value="受电弓1">
-              <a-select-option value="受电弓1">
-                受电弓1
-              </a-select-option>
-              <a-select-option value="受电弓2">
-                受电弓2
-              </a-select-option>
-              <a-select-option value="转向架">
-                转向架
-              </a-select-option>
-            </a-select>
-          </a-col>
-        </a-row>
-
-        <a-row>
-          <a-col :span="5"><span>IP地址</span></a-col>
-          <a-col :span="7">
-            <a-input></a-input>
-          </a-col>
-          <a-col :span="5">摄像头位置</a-col>
-          <a-col :span="7">
-            <a-input></a-input>
-          </a-col>
-        </a-row>
-
-        <a-row>
-          <a-col :span="5"><span>视频编码</span></a-col>
-          <a-col :span="7">
-            <a-select class="select" default-value="H.264">
-              <a-select-option value="H.264">
-                H.264
-              </a-select-option>
-              <a-select-option value="H.265">
-                H.265
-              </a-select-option>
-            </a-select>
-          </a-col>
-          <a-col :span="5">分辨率</a-col>
-          <a-col :span="7">
-            <a-select class="select" default-value="1920*1080(1080P)">
-              <a-select-option value="1920*1080(1080P)">
-                1920*1080(1080P)
-              </a-select-option>
-              <a-select-option value="390*844">
-                390*844
-              </a-select-option>
-            </a-select>
-          </a-col>
-        </a-row>
-        <div style="margin-top: 30px">
-          <div
-              style="border: 1px solid #e6e6e6;border-radius: 3px;text-align:center;background: #e6e6e6;position: relative;top: 15px;left: 50px;width: 80px;height: 30px;padding-top:5px">
-            画面设置：
-          </div>
-          <div style="border: 1px solid #e6e6e6;border-radius: 3px">
-            <a-row>
-              <a-col :span="5"></a-col>
-              <a-col :span="4"><span>亮度</span></a-col>
-              <a-col :span="11">
-                <a-progress :percent="30" size="small" :showInfo="false"/>
-              </a-col>
-              <a-col :span="4">
-                <a-input value="30"></a-input>
-              </a-col>
-            </a-row>
-
-            <a-row>
-              <a-col :span="5"></a-col>
-              <a-col :span="4"><span>对比</span></a-col>
-              <a-col :span="11">
-                <a-progress :percent="50" size="small" :showInfo="false"/>
-              </a-col>
-              <a-col :span="4">
-                <a-input value="50"></a-input>
-              </a-col>
-            </a-row>
-
-            <a-row>
-              <a-col :span="5"></a-col>
-              <a-col :span="4"><span>饱和度</span></a-col>
-              <a-col :span="11">
-                <a-progress :percent="70" size="small" :showInfo="false"/>
-              </a-col>
-              <a-col :span="4">
-                <a-input value="70"></a-input>
-              </a-col>
-            </a-row>
-          </div>
-        </div>
-      </div>
       <template #footer>
         <a-button @click="modal1Visible=false">确定</a-button>
       </template>
     </a-modal>
+    <!--文件导出modal-->
     <a-modal
         title="文件导出"
         centered
         :width="800"
-        :visible="modal2Visible"
+        :visible="downloadRecordModalVisible"
         :closable="false"
     >
       <div style="margin-top: 30px">
@@ -211,28 +193,40 @@
             style="border: 1px solid #e6e6e6;border-radius: 3px;text-align:center;background: #e6e6e6;position: relative;top: 15px;left: 50px;width: 80px;height: 30px;padding-top:5px">
           时间范围：
         </div>
-        <div style="border: 1px solid #e6e6e6;border-radius: 3px">
+        <div class="box">
           <a-row>
-            <a-col :span="5"></a-col>
-            <a-col :span="5">开始时间：</a-col>
-            <a-col :span="5">
-              <a-date-picker @change="onStartDateChange"/>
+            <a-col :span="4" class="center-txt" style="text-align: right">开始时间：</a-col>
+            <a-col :span="20">
+              <a-date-picker
+                  class="picker"
+                  @change="onStartDateChange"
+                  :value="startDate"
+                  placeholder="选择日期"
+                  :allowClear="false"/>
+              <a-time-picker
+                  class="picker"
+                  @change="onStartTimeChange"
+                  :value="startTime"
+                  placeholder="选择时间"
+                  :allowClear="false"/>
             </a-col>
-            <a-col :span="5">
-              <a-time-picker :default-open-value="moment('00:00:00', 'HH:mm:ss')" @change="onStartTimeChange"/>
-            </a-col>
-            <a-col :span="4"></a-col>
           </a-row>
-          <a-row>
-            <a-col :span="5"></a-col>
-            <a-col :span="5">结束时间：</a-col>
-            <a-col :span="5">
-              <a-date-picker @change="onStartDateChange"/>
+          <a-row style="margin-top: 10px">
+            <a-col :span="4" class="center-txt" style="text-align: right">结束时间：</a-col>
+            <a-col :span="20">
+              <a-date-picker
+                  class="picker"
+                  @change="onEndDateChange"
+                  :value="endDate"
+                  placeholder="选择日期"
+                  :allowClear="false"/>
+              <a-time-picker
+                  class="picker"
+                  @change="onEndTimeChange"
+                  :value="endTime"
+                  placeholder="选择时间"
+                  :allowClear="false"/>
             </a-col>
-            <a-col :span="5">
-              <a-time-picker :default-open-value="moment('00:00:00', 'HH:mm:ss')" @change="onStartTimeChange"/>
-            </a-col>
-            <a-col :span="4"></a-col>
           </a-row>
         </div>
       </div>
@@ -242,16 +236,16 @@
             style="border: 1px solid #e6e6e6;border-radius: 3px;text-align:center;background: #e6e6e6;position: relative;top: 15px;left: 50px;width: 80px;height: 30px;padding-top:5px">
           导出类型：
         </div>
-        <div style="border: 1px solid #e6e6e6;border-radius: 3px">
-          <a-radio-group>
+        <div class="box">
+          <a-radio-group :value="deviceType" @change="onRadioSelected">
             <a-row>
               <a-col>
-                <a-radio :value="1">全部</a-radio>
+                <a-radio :value="0">全部</a-radio>
               </a-col>
             </a-row>
             <a-row>
               <a-col>
-                <a-radio :value="2">摄像头</a-radio>
+                <a-radio :value="1">摄像头</a-radio>
                 <a-select class="select" default-value="受电弓">
                   <a-select-option value="受电弓">
                     受电弓
@@ -263,7 +257,7 @@
                     车厢
                   </a-select-option>
                 </a-select>
-                <a-radio :value="3">监视物</a-radio>
+                <a-radio :value="2" style="margin-left: 10px">监视物</a-radio>
                 <a-select class="select" default-value="受电弓">
                   <a-select-option value="受电弓">
                     受电弓
@@ -280,16 +274,16 @@
           </a-radio-group>
         </div>
       </div>
-      <div style="flex-direction: row; justify-content: center">
+      <div style="flex-direction: row; justify-content: center;margin-top: 20px">
         <span>导出路径：</span>
-        <a-input style="width: 200px" value="c:\\users\exportfile"></a-input>
+        <a-input style="width: 250px;margin-right: 10px" value="c:\\users\exportfile"></a-input>
         <a-button>浏览</a-button>
       </div>
 
       <template #footer>
-        <a-button @click="modal2Visible=false">重置</a-button>
-        <a-button @click="modal2Visible=false">取消</a-button>
-        <a-button @click="modal2Visible=false">导出</a-button>
+        <a-button @click="onDownloadRecordResetBtnClicked">重置</a-button>
+        <a-button @click="downloadRecordModalVisible=false">取消</a-button>
+        <a-button @click="onDownloadRecordBtnClicked">导出</a-button>
       </template>
     </a-modal>
   </div>
@@ -297,43 +291,66 @@
 </template>
 
 <script>
+import {request} from "@/network/request";
 import moment from 'moment'
+import PageTitle from "@/components/PageTitle";
+
+function isNotEmpty(param) {
+  return param && param != ''
+}
 
 const columns = [
   {
     title: '编号',
     dataIndex: 'number',
+    width: '70px',
+    key: 'number',
+    align: 'center'
     // scopedSlots: {customRender: 'name'},
   },
   {
     title: '磁盘号',
     // className: 'alarmTime',
     dataIndex: 'diskNo',
+    key: 'diskNo',
+    align: 'center'
   },
   {
     title: '类型',
-    dataIndex: 'type',
+    dataIndex: 'typeName',
+    key: 'typeName',
+    align: 'center'
   },
   {
     title: '状态',
     dataIndex: 'status',
+    key: 'status',
+    align: 'center'
   },
   {
     title: '总容量（GB）',
     dataIndex: 'capacity',
+    key: 'capacity',
+    align: 'center'
   },
   {
     title: '已用空间（GB）',
     dataIndex: 'usedCapacity',
+    key: 'usedCapacity',
+    align: 'center'
   },
   {
     title: '剩余空间',
     dataIndex: 'freeCapacity',
+    key: 'freeCapacity',
+    align: 'center'
   },
   {
     title: '操作',
     dataIndex: 'operation',
-    width: '170px',
+    width: '200px',
+    key: 'operation',
+    align: 'center',
     scopedSlots: {customRender: 'operation'}
   }
 ];
@@ -342,7 +359,8 @@ const tableData = [
     key: '1',
     number: '1',
     diskNo: '01',
-    type: '本地',
+    type: 1,
+    typeName: '外挂',
     status: '正常',
     capacity: '2048',
     usedCapacity: '512',
@@ -353,7 +371,8 @@ const tableData = [
     key: '2',
     number: '2',
     diskNo: '01',
-    type: '本地',
+    type: 0,
+    typeName: '本地',
     status: '正常',
     capacity: '2048',
     usedCapacity: '512',
@@ -364,45 +383,304 @@ const tableData = [
 ];
 export default {
   name: "StorInfo",
+  components: {
+    PageTitle,
+  },
   data() {
     return {
       columns,
       tableData,
-      modal1Visible: false,
-      modal2Visible: false,
+      storageConfigModalVisible: false,
+      downloadRecordModalVisible: false,
 
+      diskNoList: ['0',],
+      diskNo: '0',
+
+      saveInterval: 10,//文件保持间隔，单位：分钟
+      saveDirectory: '本地',//	保存位置
+      saveDurationPantograph: 7,//受电弓视频存储时长，单位: 天
+      saveDurationCarriage: 30,//车厢视频存储时长，单位: 天
+      saveDurationCard: 15,//车厢视频存储时长，单位: 天
+
+      saveIntervalList: [10,],//文件保持间隔，单位：分钟
+      saveDirectoryList: ['本地',],//	保存位置
+
+      allowClear: false,
+      dateFormat: 'YYYY-MM-DD',
+      timeFormat: 'HH:mm:ss',
+      startDateString: '',
+      startDate: null,
+      startTimeString: '',
+      startTime: null,
+      endDateString: '',
+      endDate: null,
+      endTimeString: '',
+      endTime: null,
+
+      deviceType: 0,
+
+      count: 200,
+      // 分页参数
+      pagination: {
+        current: 1,
+        pageSize: 10,
+        total: tableData.length,
+        // pageSizeOptions: ['2', '4', '6'], // 可选的页面显示条数
+        // showTotal: (total, range) => {
+        //   return range[0] + '-' + range[1] + ' 共' + total + '条'
+        // }, // 展示每页第几条至第几条和总数
+        hideOnSinglePage: false, // 只有一页时是否隐藏分页器
+        showQuickJumper: false, // 是否可以快速跳转至某页
+        showSizeChanger: false // 是否可以改变pageSize
+      },
+
+      statusAll: true,
+      statusNormal: false,
+      statusTrouble: false,
+      status: '',
+
+      typeAll: true,
+      typeLocal: false,
+      typeExternal: false,
+      type: '',
     }
   },
   methods: {
-    setModal1Visible() {
-      this.modal1Visible = true;
+    getStorageConfigInfo() {
+      request({
+        url: '/api/storage/config',
+        method: 'get',
+      }).then(res => {
+        if (res.code == 0) {
+          if (res.data.saveInterval) this.saveInterval = res.data.saveInterval;
+          if (res.data.saveDirectory) this.saveDirectory = res.data.saveDirectory;
+          if (res.data.saveDurationPantograph) this.saveDurationPantograph = res.data.saveDurationPantograph;
+          if (res.data.saveDurationCarriage) this.saveDurationCarriage = res.data.saveDurationCarriage;
+          if (res.data.saveDurationCard) this.saveDurationCard = res.data.saveDurationCard;
+        }
+      }).catch(err => {
+      })
     },
-    setModal2Visible() {
-      this.modal2Visible = true;
+    onStorageConfigResetBtnClicked(msg) {
+      this.showMessage(msg)
     },
-    moment,
-    onStartTimeChange(time, timeString) {
-      console.log(time, timeString);
+    onStorageConfigConfirmBtnClicked() {
+      const params = {
+        saveInterval: this.saveInterval,
+        saveDirectory: this.saveDirectory,
+        saveDurationPantograph: this.saveDurationPantograph,
+        saveDurationCarriage: this.saveDurationCarriage,
+        saveDurationCard: this.saveDurationCard
+      };
+      reques({
+        url: '/api/storage/config',
+        method: 'put',
+        data: JSON.parse(JSON.stringify(params)),
+      }).then(res => {
+        if (res.code == 0) {
+          this.storageConfigModalVisible = false;
+        }
+      }).catch(err => {
+      })
     },
-    onStartDateChange(date, dateString) {
-      console.log(date, dateString);
+    /**
+     *
+     * @param st status or type
+     * @param code
+     */
+    changeBtnAcive(st, code) {
+      if (st == 0) {//status
+        this.type=code;
+        if (code === '') {
+          this.statusAll = true;
+          this.statusNormal = this.statusTrouble = false;
+        } else if (code === 0) {
+          this.statusNormal = true;
+          this.statusAll = this.statusTrouble = false;
+        } else if (code === 1) {
+          this.statusTrouble = true;
+          this.statusAll = this.statusNormal = false;
+        }
+      } else if (st == 1) {//type
+        this.type = code;
+        if (code === '') {
+          this.typeAll = true;
+          this.typeLocal = this.typeExternal = false;
+        } else if (code === 0) {
+          this.typeLocal = true;
+          this.typeAll = this.typeExternal = false;
+        }else if (code === 1) {
+          this.typeExternal = true;
+          this.typeAll = this.typeLocal = false;
+        }
+      }
+    },
+    onPaginationClicked(e) {
+      // console.log(e)
+      this.pagination = e
     },
     onRadioChange(e) {
       console.log('radio checked', e.target.value);
     },
-    /*showConfirm() {*/
-    //   this.$confirm({
-    //     title: '是否格式化当前USB磁盘',
-    //     content: '',
-    //     onOk() {
-    //       return new Promise((resolve, reject) => {
-    //         setTimeout(Math.random() > 0.5 ? resolve : reject, 1000);
-    //       }).catch(() => console.log('Oops errors!'));
-    //     },
-    //     onCancel() {
-    //     },
-    //   });
-    // },
+    onStorConfBtnClicked() {
+      this.getStorageConfigInfo()
+      this.storageConfigModalVisible = true;
+    },
+    showMessage(msg) {
+      this.$message.info(msg)
+    },
+    moment,
+    onStartDateChange(date, dateString) {
+      this.startDateString = dateString;
+      this.startDate = this.moment(dateString, this.dateFormat)
+    },
+    onStartTimeChange(time, timeString) {
+      this.startTimeString = timeString;
+      this.startTime = this.moment(timeString, this.timeFormat)
+    },
+    onEndDateChange(date, dateString) {
+      this.endDateString = dateString;
+      this.endDate = this.moment(dateString, this.dateFormat)
+    },
+    onEndTimeChange(time, timeString) {
+      // console.log('time:', time, 'timeString:', timeString)
+      this.endTimeString = timeString;
+      this.endTime = this.moment(timeString, this.timeFormat)
+    },
+    onRadioSelected(e) {
+      this.deviceType = e.target.value;
+    },
+    onDownloadRecordResetBtnClicked() {
+
+    },
+    onDownloadRecordBtnClicked() {
+      if (!isNotEmpty(this.startDateString)) {
+        this.$message.warn('开始日期不能为空！');
+        return;
+      }
+      if (!isNotEmpty(this.startTimeString)) {
+        this.$message.warn('开始时间不能为空！');
+        return;
+      }
+      if (!isNotEmpty(this.endDateString)) {
+        this.$message.warn('结束日期不能为空！');
+        return;
+      }
+      if (!isNotEmpty(this.endTimeString)) {
+        this.$message.warn('结束时间不能为空！');
+        return;
+        this.downloadRecord();
+      }
+    },
+    downloadRecord() {
+      const params = {
+        startTime: this.startDateString + ' ' + this.startTimeString,
+        endTime: this.endTimeString + ' ' + this.endTimeString,
+      };
+      params.deviceType = this.deviceType;
+      if (this.deviceType == 1) {
+        //todo
+        params.deviceId = '';
+      }
+      if (this.deviceType == 2) {
+        //todo
+        params.deviceId = '';
+      }
+
+      request({
+        url: '/api/record/download',
+
+      }).then(res => {
+        if (res.code == 0) {
+
+        }
+      }).catch(err => {
+      })
+
+    },
+    getTableData() {
+      request({
+        url: '/api/storage/disk/list',
+        params: {
+          page: this.pagination.current,
+          count: this.count,
+          diskNo: '',
+          status: 0,
+          type: 0
+        }
+      }).then(res => {
+        if (res.code == 0) {
+          this.diskNoList = [];
+          this.diskNoList[0] = res.data.diskNo;
+          // "diskNo": "",
+          // "type": 0,
+          // "status": 0,
+          // "capacity": 0,
+          // "usedCapacity": 0
+
+          // key: '1',
+          // number: '1',
+          // diskNo: '01',
+          // type: 0,
+          // typeName: '磁盘',
+          // status: '正常',
+          // capacity: '2048',
+          // usedCapacity: '512',
+          // freeCapacity: '1536',
+          // operation: ''
+
+          const info = res.data;
+          info.key = info.number = 1;
+          if (info.type && info.type == 0) {
+            info.typeName = '本地';
+          } else if (info.type && info.type == 1) {
+            info.typeName = '外挂';
+          }
+          this.tableData.push(info)
+        }
+      }).catch(err => {
+      })
+    },
+    onDiskNoSelectChange(index, option) {
+      this.diskNo = this.diskNoList[index];
+    },
+    onSaveIntervalSelectChange(index, option) {
+      this.saveInterval = this.saveIntervalList[index];
+    },
+    onSaveDirectorySelectChange(index, option) {
+      this.saveDirectory = this.saveDirectoryList[index];
+    },
+    initDisk(value, record, index) {
+      const params = {};
+      params.diskNo = record.diskNo;
+      request({
+        url: '/api/storage/disk/initialize',
+        method: 'put',
+        data: JSON.parse(JSON.stringify(params)),
+      }).then(res => {
+        if (res.code == 0) {
+          //todo
+        }
+      }).catch(err => {
+      })
+    },
+    resetBtnClicked() {
+      this.changeBtnAcive(0, '');
+      this.changeBtnAcive(1, '');
+
+      this.statusAll = true;
+      this.statusNormal = false;
+      this.statusTrouble = false;
+      this.status = '';
+
+      this.typeAll = true;
+      this.typeLocal = false;
+      this.typeExternal = false;
+      this.type = '';
+    },
+  },
+  created() {
+
   },
 }
 </script>
@@ -414,4 +692,66 @@ export default {
   margin: 0 10px 0 10px;
 }
 
+.select {
+  width: 200px;
+}
+
+.left-txt {
+  margin: 5px 0 0 0;
+  text-align: right;
+}
+
+.right-txt {
+  margin: 5px 0 0 0;
+  text-align: left;
+}
+
+.border {
+  border: 2px solid darkgray;
+  height: 30px;
+  margin-right: 3px;
+  text-align: center;
+  padding-top: 3px;
+}
+
+.card-item {
+  margin: 15px 0 3px 0;
+}
+
+.btn {
+  width: 85px;
+  margin: 0 3px;
+}
+
+.btn1 {
+  background-color: #3E64AD;
+  color: white;
+}
+
+.btn2 {
+  background-color: orange;
+  color: white;
+}
+
+.table-title {
+  margin: 10px 0 10px 0;
+}
+
+.box {
+  border: 1px solid #e6e6e6;
+  border-radius: 3px;
+  padding: 35px 0 30px 55px;
+}
+
+.center-txt {
+  margin-top: 6px;
+}
+
+.picker {
+  width: 180px;
+}
+
+.select {
+  width: 200px;
+}
 </style>

@@ -1,7 +1,7 @@
 <template>
   <a-layout id="components-layout-demo-top-side-2">
-    <a-layout-header class="header" style="">
-      <div>HeaderHeaderHeader</div>
+    <a-layout-header class="header">
+      <div >HeaderHeaderHeader</div>
 
     </a-layout-header>
     <a-layout>

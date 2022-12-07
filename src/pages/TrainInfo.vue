@@ -1,6 +1,6 @@
 <template>
   <a-layout style="background-color: white;">
-    <span style="margin-bottom: 10px ">车辆信息</span>
+    <page-title title="车辆信息"></page-title>
     <a-card>
       <div class="container1">
         <div class="container2">
@@ -27,20 +27,27 @@
 </template>
 
 <script>
+import PageTitle from "@/components/PageTitle";
 import {request} from "@/network/request";
+
 export default {
   name: "TrainInfo",
+  components: {
+    PageTitle,
+  },
   data() {
     return {
       trainNo: '001',
       model: '复兴号',
       carriageNum: 8,
       longitude: 0,
-      latitude: 0
+      latitude: 0,
+
+
+      textarea: '',
     }
   },
   methods: {
-
     getTrainInfo() {
       request({
         url: '/api/train/get',
@@ -52,10 +59,10 @@ export default {
           this.longitude = res.data.longitude;
           this.latitude = res.data.latitude;
         }
-      }).catch(err=>{
+      }).catch(err => {
 
       })
-    }
+    },
   },
   created() {
     this.getTrainInfo()
@@ -99,5 +106,15 @@ export default {
 .input {
   width: 200px;
 }
+
+/*.span {*/
+/*  width: 140px;*/
+/*  height: 30px;*/
+/*  line-height: 30px;*/
+/*  border: 1px solid lightgray;*/
+/*  border-radius: 3px;*/
+/*  padding-left: 5px;*/
+
+/*}*/
 
 </style>

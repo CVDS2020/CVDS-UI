@@ -19,10 +19,10 @@ const routes = [
         path: '',
     //     redirect: 'dashboard'
         // redirect: 'trainInfo'
-        redirect: 'camInfo'
+        // redirect: 'camInfo'
         // redirect: 'storInfo'
         // redirect: 'boardManage'
-        // redirect: 'logInfo'
+        redirect: 'logInfo'
         // redirect: 'alarmInfo'
         // redirect: 'sysInfo'
     },

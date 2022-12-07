@@ -42,11 +42,12 @@ export default {
   },
   data() {
     return {
+      flag: 0,
       locale: zhCN,
-      modalVisible: true,
-      // modalVisible: false,
+      // modalVisible: true,
+      modalVisible: false,
       userName: 'admin',
-      pwd: 'admin'
+      pwd: 'admin',
     };
   },
   methods: {
@@ -61,17 +62,18 @@ export default {
       }).then(res => {
         if (res.code == 0) {
           this.modalVisible = false;
-          this.$router.replace('/dashboard');
+          // this.$router.replace('/dashboard');
+          this.$store.commit('setUserInfo', res.data);
           // alert('登陆成功！')
         }
       }).catch(err => {
         // console.log(err);
-        alert('登陆失败')
+        this.$message.error('登陆失败')
       })
     },
   },
   created() {
-    let arr=[0,1,2,3,4,5,6,7,8];
+    let arr = [0, 1, 2, 3, 4, 5, 6, 7, 8];
     delete arr[3];
     console.log(arr.length)
     console.log(arr)
@@ -79,6 +81,16 @@ export default {
     let arr1 = arr.filter(d => d)
     console.log(arr)
     console.log(arr1)
+    if (this.flag) {
+      console.log('if this.flag')
+    } else {
+      console.log('else this.flag')
+    }
+    if (!this.flag) {
+      console.log('!this.flag')
+    } else {
+      console.log('else !this.flag')
+    }
   }
 }
 </script>

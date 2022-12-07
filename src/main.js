@@ -3,7 +3,7 @@ import App from './App.vue'
 import router from "../router";
 import Antd from 'ant-design-vue'
 import 'ant-design-vue/dist/antd.css'
-// import axios from 'axios'
+import store from './store'
 // axios.defaults.withCredentials = true;
 
 
@@ -14,5 +14,6 @@ Vue.use(Antd)
 new Vue({
     el:'#app',
     router,
+    store,
     render: (h) => h(App)
 })
