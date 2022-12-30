@@ -45,30 +45,32 @@
         <a-col :span="2"></a-col>
         <a-col :span="2" class="center-txt" style="text-align: right">用户：</a-col>
         <a-col :span="4">
-          <a-select class="select" default-value="受电弓">
-            <a-select-option value="受电弓">
-              受电弓
-            </a-select-option>
-            <a-select-option value="转向架">
-              转向架
-            </a-select-option>
-            <a-select-option value="车厢">
-              车厢
+          <a-select
+              :value="user.username"
+              class="select"
+              @change="onUserSelectChange">
+            <!--:key只能绑定string，number.不能绑定对象  :value可以绑定对象-->
+            <a-select-option
+                v-for="(item,index) of userList"
+                :key="index"
+            >
+              {{ item.username }}
             </a-select-option>
           </a-select>
         </a-col>
         <a-col :span="3"></a-col>
         <a-col :span="2" class="center-txt" style="text-align: right">授权终端：</a-col>
         <a-col :span="4">
-          <a-select class="select" default-value="受电弓">
-            <a-select-option value="受电弓">
-              受电弓
-            </a-select-option>
-            <a-select-option value="转向架">
-              转向架
-            </a-select-option>
-            <a-select-option value="车厢">
-              车厢
+          <a-select
+              :value="terminal.name"
+              class="select"
+              @change="onTerminalSelectChange">
+            <!--:key只能绑定string，number.不能绑定对象  :value可以绑定对象-->
+            <a-select-option
+                v-for="(item,index) of terminalList"
+                :key="index"
+            >
+              {{ item.name }}
             </a-select-option>
           </a-select>
         </a-col>
@@ -80,7 +82,7 @@
         <a-col :span="2"></a-col>
       </a-row>
     </div>
-    <div style="margin: 20px 0 10px 0">信息列表[共{{tableData.length}}条]</div>
+    <div style="margin: 20px 0 10px 0">信息列表[共{{ tableData.length }}条]</div>
     <a-table
         bordered
         :columns="columns"
@@ -96,9 +98,11 @@ import 'moment/locale/zh-cn';
 import locale from 'ant-design-vue/es/date-picker/locale/zh_CN';
 import moment from 'moment';
 import {request} from "@/network/request";
+
 function isNotEmpty(param) {
   return param && param != ''
 }
+
 const columns = [
   {
     title: '编号',
@@ -148,7 +152,7 @@ const tableData = [
     username: 'admin',
     terminal: 'sdfadsffgdfgsdfg',
     operation: '登陆',
-    content:'详细内容阿水淀粉速度史蒂夫'
+    content: '详细内容阿水淀粉速度史蒂夫'
   },
   {
     key: 2,
@@ -157,7 +161,7 @@ const tableData = [
     username: 'admin',
     terminal: 'sdfadsffgdfgsdfg',
     operation: '登陆',
-    content:'详细内容阿水淀粉速度史蒂夫'
+    content: '详细内容阿水淀粉速度史蒂夫'
   },
   {
     key: 3,
@@ -166,7 +170,7 @@ const tableData = [
     username: 'admin',
     terminal: 'sdfadsffgdfgsdfg',
     operation: '登陆定时发送到发送到发送地方',
-    content:'详细内容阿水淀粉速度史蒂夫'
+    content: '详细内容阿水淀粉速度史蒂夫'
   }]
 export default {
   name: "OperationLog",
@@ -174,7 +178,7 @@ export default {
     return {
       columns,
       tableData,
-      allowClear:false,
+      allowClear: false,
       dateFormat: 'YYYY-MM-DD',
       timeFormat: 'HH:mm:ss',
       startDateString: '',
@@ -185,6 +189,12 @@ export default {
       endDate: null,
       endTimeString: '',
       endTime: null,
+
+      user: {username: '', userId: undefined},
+      userList: [],
+
+      terminal: {},
+      terminalList: [],
 
       count: 200,
       // 分页参数
@@ -202,8 +212,7 @@ export default {
       },
     };
   },
-  computed: {
-  },
+  computed: {},
   methods: {
     moment,
     onStartDateChange(date, dateString) {
@@ -229,33 +238,50 @@ export default {
         params: {
           page: this.pagination.current,
           count: this.pagination.pageSize,
-          startTime: this.startDateString+' '+this.startTimeString,
-          endTime:this.endTimeString+' '+this.endTimeString,
+          startTime: this.startDateString + ' ' + this.startTimeString,
+          endTime: this.endTimeString + ' ' + this.endTimeString,
           type: 1,//0系统日志  1操作日志
         }
       }).then(res => {
-        if(res.code==0){
+        if (res.code == 0) {
+
           const resData = res.data;
           const resTableData = resData.list;
           const len = resTableData.length;
+
+          let userMap=new Map();//user select数据源去重
+          let terminalMap=new Map();//terminal数据源去重
+
           for (let i = 1; i <= len; i++) {
-                // key: 1,
-                // number: 1,
-                // createTime: '2022-01-01 01:01:01',
-                // username: 'admin',
-                // terminal: 'sdfadsffgdfgsdfg',
-                // operation: '登陆',
-                // content:'详细内容阿水淀粉速度史蒂夫'
+            // key: 1,
+            // number: 1,
+            // createTime: '2022-01-01 01:01:01',
+            // username: 'admin',
+            // terminal: 'sdfadsffgdfgsdfg',
+            // operation: '登陆',
+            // content:'详细内容阿水淀粉速度史蒂夫'
             const info = resTableData[i - 1];
-            info.key=info.number=i;
+            info.key = info.number = i;
+
+            this.tableData.push(info);
+            userMap.set(info.userId,info.username);
+            //todo terminalMap
           }
-          this.tableData.push(info);
+
+          this.userList=[];
+          this.terminalList=[];
+          for(let [key,value] of userMap.entries()){
+            let obj={username:key,userId:value}
+            this.userList.push(obj);
+          }
+          //todo 等待回复后设置授权终端相关数据
+          // this.terminalList=terminalMap;
         }
 
-      }).catch(err => {})
+      }).catch(err => {
+      })
     },
     onPaginationClicked(e) {
-      // console.log(e)
       this.pagination = e
     },
     onResetBtnClicked() {
@@ -271,33 +297,41 @@ export default {
       this.endTime = null;
       this.endTimeString = '';
       //todo 置空两个select
+      this.user={username: '', userId: undefined};
+      this.terminal={};
+
     },
     onQueryBtnClicked() {
-      if(!isNotEmpty(this.startDateString)){
+      if (!isNotEmpty(this.startDateString)) {
         this.$message.warn('开始日期不能为空！');
         return;
       }
-      if(!isNotEmpty(this.startTimeString)){
+      if (!isNotEmpty(this.startTimeString)) {
         this.$message.warn('开始时间不能为空！');
         return;
       }
-      if(!isNotEmpty(this.endDateString)){
+      if (!isNotEmpty(this.endDateString)) {
         this.$message.warn('结束日期不能为空！');
         return;
       }
-      if(!isNotEmpty(this.endTimeString)){
+      if (!isNotEmpty(this.endTimeString)) {
         this.$message.warn('结束时间不能为空！');
         return;
       }
       this.getTableData();
-      // console.log('=====>' + this.startDateString + ' ' + this.startTimeString + this.endDateString + ' ' + this.endTimeString);
+    },
+    onUserSelectChange(index, option) {
+      this.user = this.userList[index];
+    },
+    onTerminalSelectChange(index, option) {
+      //todo
     },
   },
   created() {
-    this.endDateString=moment(new Date()).format(this.dateFormat);
-    this.startTimeString= this.endTimeString=moment(new Date()).format(this.timeFormat);
-    this.startDateString=moment().subtract(23,'hours').format(this.dateFormat);
-    // console.log('=====>' + this.startDateString + ' ' + this.startTimeString +'---'+ this.endDateString + ' ' + this.endTimeString);
+    //获取"用户"、"授权终端"两个select的数据
+    this.endDateString = moment(new Date()).format(this.dateFormat);
+    this.startTimeString = this.endTimeString = moment(new Date()).format(this.timeFormat);
+    this.startDateString = moment().subtract(23, 'hours').format(this.dateFormat);
     this.getTableData()
   }
 }
@@ -312,7 +346,8 @@ export default {
 .center-txt {
   margin-top: 6px;
 }
-.select{
+
+.select {
   width: 200px;
 }
 

@@ -53,9 +53,11 @@
         :columns="columns"
         :data-source="tableData"
         bordered
-        size="small"
-        :pagination="false"
-        :scroll="{y: 300 }">
+        @change="onPaginationClicked"
+        :pagination="pagination">
+<!--        size="small"-->
+<!--        :pagination="false"-->
+<!--        :scroll="{y: 300 }">-->
       <template #alarmPriority="value,record,index">
         <div>
           <img v-if="value==='三级'" class="img" src="../assets/img/icon-alarm-blue.png" alt="">
@@ -127,7 +129,6 @@ const tableData = [
     alarmPriority: '三级',
     alarmDescription: '摄像头05已关闭，请检查',
     alreadyTime: '',
-    imgUrl: '../assets/img/icon-alarm-blue.png',
   },
   {
     key: 2,
@@ -137,7 +138,6 @@ const tableData = [
     alarmPriority: '一级',
     alarmDescription: '摄像头03已关闭，请检查',
     alreadyTime: '已处理',
-    imgUrl: '../assets/img/icon-alarm-blue.png',
   },
   {
     key: 3,
@@ -147,37 +147,34 @@ const tableData = [
     alarmPriority: '二级',
     alarmDescription: '摄像头01被部分遮挡，请检查',
     alreadyTime: '',
-    imgUrl: '../assets/img/icon-alarm-blue.png',
-  }
-
-
-  // {
-  //   key: 4,
-  //   number: 4,
-  //   alarmTime: '2022/10/22 10:12:36',
-  //   alarmType: '故障类别',
-  //   alarmPriority: '二级',
-  //   alarmDescription: '摄像头02故障，请检查',
-  //   alreadyTime: '未处理',
-  // },
-  // {
-  //   key: 5,
-  //   number: 5,
-  //   alarmTime: '2022/10/22 10:12:36',
-  //   alarmType: '故障类别',
-  //   alarmPriority: '一级',
-  //   alarmDescription: '存储空间不足，自动停止保存视频',
-  //   alreadyTime: '未处理',
-  // },
-  // {
-  //   key: 6,
-  //   number: 6,
-  //   alarmTime: '2022/10/22 10:12:36',
-  //   alarmType: '故障类别',
-  //   alarmPriority: '一级',
-  //   alarmDescription: '04摄像头，受电弓故障，请确认并联系人员检修',
-  //   alreadyTime: '未处理',
-  // },
+  },
+  {
+    key: 4,
+    number: 4,
+    alarmTime: '2022/10/22 10:12:36',
+    alarmType: '故障类别',
+    alarmPriority: '二级',
+    alarmDescription: '摄像头02故障，请检查',
+    alreadyTime: '未处理',
+  },
+  {
+    key: 5,
+    number: 5,
+    alarmTime: '2022/10/22 10:12:36',
+    alarmType: '故障类别',
+    alarmPriority: '一级',
+    alarmDescription: '存储空间不足，自动停止保存视频',
+    alreadyTime: '未处理',
+  },
+  {
+    key: 6,
+    number: 6,
+    alarmTime: '2022/10/22 10:12:36',
+    alarmType: '故障类别',
+    alarmPriority: '一级',
+    alarmDescription: '04摄像头，受电弓故障，请确认并联系人员检修',
+    alreadyTime: '未处理',
+  },
 ];
 
 export default {
@@ -193,13 +190,26 @@ export default {
       storageCapacity: 1,
       storageUsedCapacity: 1,
       storageFreeCapacity: 1,
+      // 分页参数
+      pagination: {
+        current: 1,
+        pageSize: 10,
+        total: tableData.length,
+        // pageSizeOptions: ['2', '4', '6'], // 可选的页面显示条数
+        // showTotal: (total, range) => {
+        //   return range[0] + '-' + range[1] + ' 共' + total + '条'
+        // }, // 展示每页第几条至第几条和总数
+        hideOnSinglePage: false, // 只有一页时是否隐藏分页器
+        showQuickJumper: false, // 是否可以快速跳转至某页
+        showSizeChanger: false // 是否可以改变pageSize
+      },
     }
   },
   mounted() {
   },
   methods: {
-    imgUlr(value, record, index) {
-      console.log("====>", value, record, index)
+    onPaginationClicked(e) {
+      this.pagination = e
     },
     toAlarmInfo() {
       this.$router.replace('/alarmInfo')
@@ -230,26 +240,43 @@ export default {
         url: '/api/alarm/getLast'
       }).then(res => {
         if (res.code == 0) {
+
+              // key: 1,
+              // number: 1,
+              // alarmTime: '2022/10/22 10:12:36',
+              // alarmType: '故障类别',
+              // alarmPriority: '三级',
+              // alarmDescription: '摄像头05已关闭，请检查',
+              // alreadyTime: '',
+
+
+              // "id": "",
+              // "deviceId": "",
+              // "channelId": "",
+              // "alarmPriority": "",
+              // "alarmTime": "",
+              // "alarmDescription": "",
+              // "alarmType": "",
+              // "createTime": "",
+              // "alreadyTime": "",
+              // "alreadyUser": 0,
+              // "alreadyUserName": ""
           this.tableData = [];
           const resData = res.data;
           const len = res.data.length;
           for (let i = 1; i <= len; i++) {
-            this.tableData[i].key = i;
-            this.tableData[i].number = i;
-            this.tableData[i].alarmTime = resData[i].alarmTime;
-            this.tableData[i].alarmPriority = resData[i].alarmPriority;
-            this.tableData[i].alarmDescription = resData[i].alarmDescription;
-            this.tableData[i].alreadyTime = resData[i].alreadyTime;
+            const info=resData[i-1];
+            info.key=info.number=i;
+            tableData.push(info);
           }
         }
       }).catch(err => {
-
       })
     },
   },
   created() {
-    // this.getStatistics()
-    // this.getLastAlarm()
+    this.getStatistics()
+    this.getLastAlarm()
   }
 
 }

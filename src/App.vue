@@ -91,6 +91,22 @@ export default {
     } else {
       console.log('else !this.flag')
     }
+    let a=[1,2,3,4,5,6,1,2];
+    let s=new Set(a);
+    let na=Array.from(s)
+    console.log('a:',a,'na:',na)
+
+    let m=new Map();
+    m.set('a',1);
+    m.set('a',1);
+    m.set('b',2);
+    console.log('m:',m)
+    let ma=[];
+    for(let [key,value] of m.entries()){
+      let obj={username:key,userid:value}
+      ma.push(obj);
+    }
+    console.log('ma:',ma);
   }
 }
 </script>

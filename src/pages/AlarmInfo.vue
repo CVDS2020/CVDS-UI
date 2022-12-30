@@ -45,30 +45,32 @@
         <a-col :span="2"></a-col>
         <a-col :span="2" class="center-txt" style="text-align: right">故障类别：</a-col>
         <a-col :span="4">
-          <a-select class="select" default-value="受电弓">
-            <a-select-option value="受电弓">
-              受电弓
-            </a-select-option>
-            <a-select-option value="转向架">
-              转向架
-            </a-select-option>
-            <a-select-option value="车厢">
-              车厢
+          <a-select
+              :value="troubleType"
+              class="select"
+              @change="onTroubleTypeSelectChange">
+            <!--:key只能绑定string，number.不能绑定对象  :value可以绑定对象-->
+            <a-select-option
+                v-for="(item,index) of troubleTypeList"
+                :key="index"
+            >
+              {{ item}}
             </a-select-option>
           </a-select>
         </a-col>
         <a-col :span="3"></a-col>
         <a-col :span="2" class="center-txt" style="text-align: right">告警级别：</a-col>
         <a-col :span="4">
-          <a-select class="select" default-value="受电弓">
-            <a-select-option value="受电弓">
-              受电弓
-            </a-select-option>
-            <a-select-option value="转向架">
-              转向架
-            </a-select-option>
-            <a-select-option value="车厢">
-              车厢
+          <a-select
+              :value="alarmPriority"
+              class="select"
+              @change="onAlarmPrioritySelectChange">
+            <!--:key只能绑定string，number.不能绑定对象  :value可以绑定对象-->
+            <a-select-option
+                v-for="(item,index) of alarmPriorityList"
+                :key="index"
+            >
+              {{ item }}
             </a-select-option>
           </a-select>
         </a-col>
@@ -94,7 +96,8 @@
         bordered
         :columns="columns"
         :data-source="tableData"
-        @change="handleChange">
+        @change="onPaginationClicked"
+        :pagination="pagination">
       <template #already="value,record,index">
         <div>
           <span v-if="value==='未处理'" style="color: red">未处理</span>
@@ -221,6 +224,12 @@ export default {
       endTimeString: '',
       endTime: null,
 
+      troubleType:'',
+      troubleTypeList:[],
+
+      alarmPriority:'',
+      alarmPriorityList:[],
+
       count: 200,
       // 分页参数
       pagination: {
@@ -275,6 +284,9 @@ export default {
           const resData = res.data;
           const resTableData = resData.list;
           const len = resTableData.length;
+
+          let alarmPrioritySet=new Set();
+          let troubleTypeSet=new Set();
           for (let i = 1; i <= len; i++) {
             // {
             //   "id": "",
@@ -303,15 +315,24 @@ export default {
             if(!isNotEmpty(info.alreadyTime)){
               info.already='未处理';
             }
+            this.tableData.push(info);
+
+            alarmPrioritySet.add(info.alarmPriority);
+            //todo
+            // troubleTypeSet.set(info.troubleType);
           }
-          this.tableData.push(info);
+
+          this.alarmPriorityList=[];
+          this.troubleTypeList=[];
+          this.alarmPriorityList=Array.from(alarmPrioritySet);
+          this.troubleTypeList=Array.from(troubleTypeSet);
+
         }
 
       }).catch(err => {
       })
     },
     onPaginationClicked(e) {
-      // console.log(e)
       this.pagination = e
     },
     onResetBtnClicked() {
@@ -332,6 +353,7 @@ export default {
       this.isAlreadyActive = false;
       this.isUntreatedActive = false;
       //todo 置空两个select
+
 
       //todo '处理确认'排序失效
     },
@@ -355,12 +377,6 @@ export default {
       this.getTableData();
       console.log('=====>' + this.startDateString + ' ' + this.startTimeString + this.endDateString + ' ' + this.endTimeString);
     },
-    handleChange(pagination, filters, sorter) {
-      console.log('Various parameters', pagination, filters, sorter);
-      // this.filteredInfo = filters;
-      // this.sortedInfo = sorter;
-      // console.log("sortedInfo:", sorter)
-    },
     changeBtnAcive(already) {
       if (already == -1) {
         this.isAllActive = true;
@@ -374,6 +390,19 @@ export default {
       }
       this.already = already
     },
+    onTroubleTypeSelectChange(index,option){
+      this.troubleType=this.troubleTypeList[index];
+    },
+    onAlarmPrioritySelectChange(index,option){
+      this.alarmPriority=this.alarmPriorityList[index];
+    },
+  },
+  created() {
+    //两个select的数据
+    this.endDateString = moment(new Date()).format(this.dateFormat);
+    this.startTimeString = this.endTimeString = moment(new Date()).format(this.timeFormat);
+    this.startDateString = moment().subtract(23, 'hours').format(this.dateFormat);
+    this.getTableData()
   }
 }
 </script>

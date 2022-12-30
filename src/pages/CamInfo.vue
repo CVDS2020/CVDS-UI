@@ -73,7 +73,6 @@
         <button class="btn" style="background-color:#158BCD" @click="onAddBtnClicked('编辑摄像头')">
           <img class="btn-icon" src="../assets/img/icon-btn-edit.png" alt="">编辑
         </button>
-        <!--        <button class="btn" style="background-color: green" @click="() => (addModalVisible=true)">-->
         <button class="btn" style="background-color: green" @click="onAddBtnClicked('添加摄像头')">
           <img class="btn-icon" src="../assets/img/icon-btn-add.png" alt="">添加
         </button>
@@ -83,12 +82,13 @@
     <a-table :columns="columns"
              :data-source="tableData"
              bordered
+             @change="onPaginationClicked"
+             :pagination="pagination"
              :row-selection="{
                 type:'radio',
                 hideDefaultSelections:true,//去掉『全选』『反选』两个默认选项
                 selectedRowKeys: selectedRowRadioKeys,
-                onChange: onSelectRadioChange
-                }">
+                onChange: onSelectRadioChange}">
       <template #onlineText="value,record,index">
         <div>
           <span v-if="value==='在线'" style="color: green">{{ value }}</span>
@@ -124,7 +124,7 @@
       <!--        <a-button type="primary" ghost @click="hide(record)">编辑</a-button>-->
       <!--      </template>-->
     </a-table>
-    <!--添加摄像头modal--><!--编辑摄像头modal-->
+    <!--添加摄像头modal与编辑摄像头modal 共用-->
     <a-modal
         :title="modalTitle"
         centered
@@ -146,9 +146,9 @@
                 @change="onAddSuperviseTypeSelectChange"
             >
               <a-select-option
-                  v-for="(item,index) of superviseTypeList"
+                  v-for="(item,index) of superviseList"
                   :key="index">
-                {{ item.name }}
+                {{ item.typeName }}
               </a-select-option>
             </a-select>
           </a-col>
@@ -392,12 +392,10 @@
             <a-col :span="19"></a-col>
             <a-col :span="5">
               <button style="margin: 30px 0 20px 0;border:1px solid #e6e6e6;border-radius: 3px;width: 90px;height: 35px"
-                      @click="onDefaultValueBtnClicked">恢复默认值
+                      @click="onVideoConfigDefaultValueBtnClicked">恢复默认值
               </button>
             </a-col>
-            <a-row>
 
-            </a-row>
           </div>
         </div>
 
@@ -510,7 +508,6 @@ const tableData = [
     number: 1,
     name: '摄像头01',
     model: '',
-    deviceId: 1,
     superviseTargetType: 1,
     superviseTargetTypeName: '受电弓',
     superviseTargetId: 1,
@@ -527,7 +524,6 @@ const tableData = [
     number: 2,
     name: '摄像头02',
     model: '',
-    deviceId: 2,
     superviseTargetType: 2,
     superviseTargetTypeName: '受电弓',
     superviseTargetId: 2,
@@ -544,7 +540,6 @@ const tableData = [
     number: 3,
     name: '摄像头03',
     model: '',
-    deviceId: 3,
     superviseTargetType: 3,
     superviseTargetTypeName: '受电弓3',
     superviseTargetId: 3,
@@ -561,7 +556,6 @@ const tableData = [
     number: 4,
     name: '摄像头04',
     model: '',
-    deviceId: 4,
     superviseTargetType: 4,
     superviseTargetTypeName: '受电弓4',
     superviseTargetId: 4,
@@ -578,7 +572,6 @@ const tableData = [
     number: 5,
     name: '摄像头05',
     model: '',
-    deviceId: 5,
     superviseTargetType: 5,
     superviseTargetTypeName: '受电弓5',
     superviseTargetId: 5,
@@ -595,7 +588,6 @@ const tableData = [
     number: 6,
     name: '摄像头06',
     model: '',
-    deviceId: 6,
     superviseTargetType: 6,
     superviseTargetTypeName: '受电弓6',
     superviseTargetId: 6,
@@ -627,25 +619,37 @@ export default {
       isAllActive: true,
       isOnlineActive: false,
       isOfflineActive: false,
+      count: 200,
+      // 分页参数
+      pagination: {
+        current: 1,
+        pageSize: 10,
+        total: tableData.length,
+        // pageSizeOptions: ['2', '4', '6'], // 可选的页面显示条数
+        // showTotal: (total, range) => {
+        //   return range[0] + '-' + range[1] + ' 共' + total + '条'
+        // }, // 展示每页第几条至第几条和总数
+        hideOnSinglePage: false, // 只有一页时是否隐藏分页器
+        showQuickJumper: false, // 是否可以快速跳转至某页
+        showSizeChanger: false // 是否可以改变pageSize
+      },
       /*   /api/device/query/devices请求参数    start   */
-      page: 1,
-      count: 10,
       keyword: undefined,
-      online: true,
+      online: undefined,
       inputCarriageNo: undefined,
       selectedSuperviseType: {name: ''},
       isOnlineHasNextPage: true,
       isOffLineHasNextPage: true,
       /*   /api/device/query/devices请求参数    end   */
+
       superviseTypeList: [{type: 4, name: '受电弓'}, {type: 5, name: '转向架'}, {type: 6, name: '车厢'}],
-      selectedRowRadioKeys: [],//所选中checkbox、radio的key
+      selectedRowRadioKeys: [],//所选中checkbox或radio的key
       sortedInfo: undefined,
       //添加摄像头相关数据
-      superviseList: [{name: '受电弓1', carriageNo: 1, id: 1}, {name: '受电弓2', carriageNo: 2, id: 2}, {
-        name: '受电弓3',
-        carriageNo: 3,
-        id: 3
-      }],//监视物、所在车厢下拉选择框数据源
+      superviseList: [
+        {typeName: '受电弓', name: '受电弓1', carriageNo: 1, id: 1},
+        {typeName: '转向架', name: '转向架2', carriageNo: 2, id: 2},
+        {typeName: '车厢', name: '车厢3', carriageNo: 3, id: 3}],//监视物类型、监视物、所在车厢下拉选择框数据源
       add: {
         addInputName: 'codeTestDevName0',//input摄像头名称
         addInputIp: '0.0.0.3',//inputIP
@@ -655,7 +659,8 @@ export default {
         superviseTargetId: undefined,//监视物ID
         superviseTargetName: '',//监视物名称
         carriageNo: '',//所在车厢
-        deviceId: undefined
+        id: undefined,//该值对应值为数据库ID
+        deviceId:undefined,//该值对应数值为设备国际ID
       },
       videoConfig: {
         encoder: 'H.264',
@@ -669,6 +674,9 @@ export default {
     }
   },
   methods: {
+    onPaginationClicked(e) {
+      this.pagination = e
+    },
     getSuperviseTypeList() {
       request({
         url: '/api/supervise/type/list',
@@ -692,13 +700,15 @@ export default {
 
       const params = {};
       //必传参数
-      params.page = this.page;
+      params.page = this.pagination.current;
       params.count = this.count;
       //非必传参数
       if (isNotEmpty(this.keyword)) {
         params.keyword = this.keyword;
       }
-      params.online = this.online;
+      if (isNotEmpty(this.online)) {
+        params.online = this.online;
+      }
       if (isNotEmpty(this.inputCarriageNo)) {
         params.carriageNO = this.inputCarriageNo;
       }
@@ -720,6 +730,36 @@ export default {
               } else {
                 this.isOfflineHasNextPage = resData.hasNextPage;
               }
+
+              // key: 6,
+              // number: 6,
+              // name: '摄像头06',
+              // model: '',
+              // superviseTargetType: 6,
+              // superviseTargetTypeName: '受电弓6',
+              // superviseTargetId: 6,
+              // superviseTargetName: '受电弓6',
+              // carriageNo: 6,
+              // position: '受电弓位置01',
+              // ip: '192.168.1.6',
+              // onlineText: '在线',
+              // superviseTargetStatusText: '正常',
+              // operation: ''
+
+
+              // "id": 0,
+              // "deviceId": "",
+              // "name": "",
+              // "superviseTargetType": 0,
+              // "superviseTargetTypeName": "",
+              // "superviseTargetId": 0,
+              // "superviseTargetName": "",
+              // "carriageNo": 0,
+              // "position": "",
+              // "ip": "",
+              // "online": "",
+              // "superviseTargetStatus": 0,
+              // "superviseTargetStatusText": ""
               for (let i = 1; i <= len; i++) {
                 const info = resTableData[i - 1];
                 info.model = '';//表格zhong需要显示该内容
@@ -730,14 +770,16 @@ export default {
                   info.onlineText = '在线'
                 }
                 //计算key、number
-                if (!resData.isLastPage) {
-                  info.key = info.number = i + (this.page - 1) * this.count;
-                  this.page++;
-                } else {
-                  info.key = info.number = i + this.page * this.count;
-                }
+                info.number = info.key = i;
+                // if (!resData.isLastPage) {
+                //   info.key = info.number = i + (this.page - 1) * this.count;
+                //   this.page++;
+                // } else {
+                //   info.key = info.number = i + this.page * this.count;
+                // }
                 this.tableData.push(info);
               }
+              this.pagination.total = this.tableData.length;
             }
           }
       ).catch(err => {
@@ -765,8 +807,16 @@ export default {
       // this.inputCarriageNo = null;
       // this.selectedSuperviseType = {name: ''};
       this.tableData = [];
-      this.page = 1;
-      this.count = 10;
+      this.pagination = {
+        current: 1,
+        pageSize: 10,
+        total: tableData.length,
+
+        hideOnSinglePage: false, // 只有一页时是否隐藏分页器
+        showQuickJumper: false, // 是否可以快速跳转至某页
+        showSizeChanger: false // 是否可以改变pageSize
+      };
+      this.pagination = 1;
       this.isOnlineHasNextPage = true;
       this.isOffLineHasNextPage = true;
       this.getDevicesTableData();
@@ -787,7 +837,7 @@ export default {
       this.add.superviseTargetId = this.tableData[selectedRowRadioKey - 1].superviseTargetId//网络请求参数
       this.add.superviseTargetName = this.tableData[selectedRowRadioKey - 1].superviseTargetName//select显示用
       this.add.carriageNo = this.tableData[selectedRowRadioKey - 1].carriageNo;//select显示用 //网络请求参数
-      this.add.deviceId = this.tableData[selectedRowRadioKey - 1].deviceId;//select显示用 //网络请求路径
+      this.add.id = this.tableData[selectedRowRadioKey - 1].id;//select显示用 //网络请求路径
     },
     setAddVideoConfig(resData) {
       if (!resData) {
@@ -802,7 +852,7 @@ export default {
       if (isNotEmpty(resData.superviseTargetId)) this.add.superviseTargetId = resData.superviseTargetId//网络请求参数
       if (isNotEmpty(resData.superviseTargetName)) this.add.superviseTargetName = resData.superviseTargetName//select显示用
       if (isNotEmpty(resData.carriageNo)) this.add.carriageNo = resData.carriageNo;//select显示用 //网络请求参数
-      if (isNotEmpty(resData.deviceId)) this.add.deviceId = resData.deviceId;//select显示用 //网络请求路径
+      if (isNotEmpty(resData.deviceId)) this.add.id = resData.deviceId;//select显示用 //网络请求路径
       if (resData.videoConfig) {
         if (isNotEmpty(resData.videoConfig.encoder)) this.videoConfig.encoder = resData.videoConfig.encoder;
         if (isNotEmpty(resData.videoConfig.width)) this.videoConfig.width = resData.videoConfig.width;
@@ -819,7 +869,42 @@ export default {
       if (isNotEmpty(resData.brightness)) this.videoConfig.brightness = resData.brightness;
       if (isNotEmpty(resData.contrast)) this.videoConfig.contrast = resData.contrast;
       if (isNotEmpty(resData.saturation)) this.videoConfig.saturation = resData.saturation;
-      console.log('======', this.add, this.videoConfig)
+    },
+    setViewVideoConfig(resData) {
+      if (!resData) {
+        return;
+      }
+      // /api/device/query/devices/{deviceId}
+      if (isNotEmpty(resData.name)) this.add.addInputName = resData.name;//input显示用 //网络请求参数
+      if (isNotEmpty(resData.ip)) this.add.addInputIp = resData.ip;//input显示用 //网络请求参数
+      if (isNotEmpty(resData.position)) this.add.addInputPosition = resData.position;//input显示用 //网络请求参数
+      if (isNotEmpty(resData.superviseTargetType)) this.add.superviseTargetType = resData.superviseTargetType;//网络请求参数
+      if (isNotEmpty(resData.superviseTargetTypeName)) this.add.superviseTargetTypeName = resData.superviseTargetTypeName;//select显示用
+      if (isNotEmpty(resData.superviseTargetId)) this.add.superviseTargetId = resData.superviseTargetId//网络请求参数
+      if (isNotEmpty(resData.superviseTargetName)) this.add.superviseTargetName = resData.superviseTargetName//select显示用
+      if (isNotEmpty(resData.carriageNo)) this.add.carriageNo = resData.carriageNo;//select显示用 //网络请求参数
+      if (isNotEmpty(resData.id)) this.add.id = resData.id;
+      if (isNotEmpty(resData.deviceId)) this.add.deviceId = resData.deviceId;
+      if (resData.videoConfig) {
+        if (isNotEmpty(resData.videoConfig.encoder)) this.videoConfig.encoder = resData.videoConfig.encoder;
+        if (isNotEmpty(resData.videoConfig.width)) this.videoConfig.width = resData.videoConfig.width;
+        if (isNotEmpty(resData.videoConfig.height)) this.videoConfig.height = resData.videoConfig.height;
+        if (isNotEmpty(resData.videoConfig.brightness)) this.videoConfig.brightness = resData.videoConfig.brightness;
+        if (isNotEmpty(resData.videoConfig.contrast)) this.videoConfig.contrast = resData.videoConfig.contrast;
+        if (isNotEmpty(resData.videoConfig.saturation)) this.videoConfig.saturation = resData.videoConfig.saturation;
+      }
+    },
+    setEditVideoConfig(resData) {
+      if (!resData) {
+        return;
+      }
+      // /api/device/query/videoConfig/{deviceId}
+      if (isNotEmpty(resData.encoder)) this.videoConfig.encoder = resData.encoder;
+      if (isNotEmpty(resData.width)) this.videoConfig.width = resData.width;
+      if (isNotEmpty(resData.height)) this.videoConfig.height = resData.height;
+      if (isNotEmpty(resData.brightness)) this.videoConfig.brightness = resData.brightness;
+      if (isNotEmpty(resData.contrast)) this.videoConfig.contrast = resData.contrast;
+      if (isNotEmpty(resData.saturation)) this.videoConfig.saturation = resData.saturation;
     },
     //主页面"监视物类型"select
     onSelectChange(index, option) {
@@ -860,7 +945,8 @@ export default {
       this.add.superviseTargetId = undefined;
       this.add.superviseTargetName = '';
       this.add.carriageNo = '';
-      this.add.deviceId = undefined;
+      this.add.id = undefined;
+      this.add.deviceId=undefined;
 
       this.videoConfig.encoder = '';
       this.videoConfig.width = 0;
@@ -881,7 +967,7 @@ export default {
         if (this.modalTitle === '添加摄像头') {
           urlStr = '/api/device/query/devices/add';
         } else if (this.modalTitle === '编辑摄像头') {
-          urlStr = '/api/device/query/devices/' + this.add.deviceId + '/update';
+          urlStr = '/api/device/query/devices/' + this.add.id + '/update';
         }
         const params = {
           ip: this.add.addInputIp,
@@ -908,13 +994,13 @@ export default {
       }
     },
     onQueryClicked() {
-      this.getDevicesTableData();
+      this.refreshTable();
     },
     changeBtnAcive(online) {
       if (online == -1) {
         this.isAllActive = true;
         this.isOnlineActive = this.isOfflineActive = false;
-        this.online = true;
+        this.online = undefined;
       } else if (online == 1) {
         this.isOnlineActive = true;
         this.isAllActive = this.isOfflineActive = false;
@@ -925,7 +1011,6 @@ export default {
         this.online = false;
       }
     },
-
     onAddBtnClicked(title) {
       this.modalTitle = title;
       if (title === '编辑摄像头') {
@@ -951,7 +1036,7 @@ export default {
         this.setAdd();
         request({
           // url: '/api/device/query/devices/'+this.tableData[selectedRowRadioKey - 1].deviceId+'/delete',
-          url: '/api/device/query/devices/' + 1 + '/delete',
+          url: '/api/device/query/devices/' + this.add.id + '/delete',
           method: 'delete',
         }).then(res => {
           if (res.code == 200) {
@@ -968,37 +1053,54 @@ export default {
       this.popconfirmVisiable = false;
       this.onModalClean();
     },
-
     onRefreshBtnClicked() {
       this.selectedRowRadioKeys = [];
       this.onAddModalCancel();
       this.refreshTable()
     },
-
     onCamInfoImgClicked(value, record, index) {
+      //点击img的时候确定所选设备的id、deviceId
+      this.add.id=record.id;
+      this.add.deviceId=record.deviceId;
+      //todo 调试时使用
       this.camInfoModalVisible = true;
       request({
-        url: '/api/device/query/devices/' + record.deviceId
+        url: '/api/device/query/devices/' + this.add.id
       }).then(res => {
         if (res.code == 0) {
-          this.setAddVideoConfig(res.data)
+          this.setViewVideoConfig(res.data)
+          //todo
+          // this.camInfoModalVisible = true;
         }
       }).catch(err => {
+        this.$message.warn('数据请求失败！')
       })
     },
+    /**
+     * 查看摄像头信息modal中确定按钮
+     */
     onCamInfoBtnClicked() {
       this.camInfoModalVisible = false;
       this.onModalClean()
     },
-
     onVideoConfigImgClicked(value, record, index) {
-      this.videoConfig.encoder = 'H.264';
-      this.videoConfig.width = 1920;
-      this.videoConfig.height = 1080;
-      this.videoConfig.brightness = 50;
-      this.videoConfig.contrast = 50;
-      this.videoConfig.saturation = 50;
+      //点击img的时候确定所选设备的id、deviceId
+      this.add.id=record.id;
+      this.add.deviceId=record.deviceId;
+      //todo 调试时使用
       this.videoConfigModalVisible = true;
+      request({
+        url:'/api/device/query/videoConfig/'+this.add.deviceId,
+        method:'get',
+      }).then(res=>{
+        if(res.code==0){
+          this.setEditVideoConfig(res.data)
+          //todo
+          // this.videoConfigModalVisible = true;
+        }
+      }).catch(err=>{
+        this.$message.warn('数据请求失败！')
+      })
     },
     onRemoteCtrlClicked(value, record, index, flag) {
       let url = '';
@@ -1026,13 +1128,25 @@ export default {
     onSaturationPercentChange(per) {
       this.videoConfig.saturation = per;
     },
-    onDefaultValueBtnClicked() {
-      this.app.deviceId = record.deviceId;
+    /**
+     * 恢复默认值Btn
+     */
+    onVideoConfigDefaultValueBtnClicked() {
+      const params={};
+      params.encoder=this.videoConfig.encoder;
+      params.width=this.videoConfig.width;
+      params.height=this.videoConfig.height;
+      params.brightness=this.videoConfig.brightness;
+      params.contrast=this.videoConfig.contrast;
+      params.saturation=this.videoConfig.saturation;
       request({
-        url: '/api/device/query/videoConfig/' + record.deviceId,
+        url: '/api/device/query/videoConfig/' + this.add.deviceId,//设备国际ID
+        method:'post',
+        data: JSON.parse(JSON.stringify(params)),
       }).then(res => {
         if (res.code == 0) {
-          this.setAddVideoConfig(res.data)
+          this.videoConfigModalVisible = false;
+          this.$message.info('更新视频配置信息成功');
         }
       }).catch(err => {
       })
@@ -1042,26 +1156,28 @@ export default {
       this.videoConfigModalVisible = false;
     },
     onVideoConfigResetBtnClicked() {
-      this.$message.error('接口暂未确定')
+      this.$message.error('接口未找到')
+      //todo
       // request({
-      //   url: '/api/device/query/devices/' + record.deviceId + '/update',....
+      //   url: 'api/device/query/videoConfig/' + this.add.deviceId + '/update',
       //   method:'post',
-      //   params:{}
+      //   data:{}
       // }).then(res => {
       //   if (res.code == 0) {
-      //     //todo
       //   }
       // }).catch(err => {
       // })
     },
     onVideoConfigConfirmBtnClicked() {
-      this.onVideoConfigResetBtnClicked()
+      this.$message.error('接口未找到')
+      //todo
+      // this.onVideoConfigResetBtnClicked()
     },
   },
-  computed: {},
   created() {
-    // this.getSuperviseTypeList();
-    // this.getDevices();
+    this.getSuperviseTypeList();
+    this.getSuperviseList();
+    this.getDevicesTableData();
   }
 }
 </script>

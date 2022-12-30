@@ -22,13 +22,13 @@
         </a-col>
         <a-col :span="2" class="left-txt">状态：</a-col>
         <a-col :span="6">
-          <a-button :class="{btn:true,btn1:statusAll}" @click="changeBtnAcive(0,'')">全部</a-button>
+          <a-button :class="{btn:true,btn1:statusAll}" @click="changeBtnAcive(0,undefined)">全部</a-button>
           <a-button :class="{btn:true,btn1:statusNormal}" @click="changeBtnAcive(0,0)">正常</a-button>
           <a-button :class="{btn:true,btn1:statusTrouble}" @click="changeBtnAcive(0,1)">故障</a-button>
         </a-col>
         <a-col :span="2" class="left-txt">类型：</a-col>
         <a-col :span="6">
-          <a-button :class="{btn:true,btn1:typeAll}" @click="changeBtnAcive(1,'')">全部</a-button>
+          <a-button :class="{btn:true,btn1:typeAll}" @click="changeBtnAcive(1,undefined)">全部</a-button>
           <a-button :class="{btn:true,btn1:typeLocal}" @click="changeBtnAcive(1,0)">本地</a-button>
           <a-button :class="{btn:true,btn1:typeExternal}" @click="changeBtnAcive(1,1)">外接USB</a-button>
         </a-col>
@@ -39,7 +39,7 @@
       <a-row class="card-item">
         <a-col :span="21"></a-col>
         <a-col :span="3">
-          <a-button @click="test">查询</a-button>
+          <a-button @click="getTableData">查询</a-button>
         </a-col>
       </a-row>
     </a-card>
@@ -61,7 +61,7 @@
             </a-col>
             <a-col :span="6">
               <img style="width: 25px;height: 25px" src="../assets/img/icon-export.png" alt=""
-                   @click="downloadRecordModalVisible=true">
+                   @click="onDownloadRecordImgClicked">
             </a-col>
             <a-col :span="6">
               <a-popconfirm
@@ -110,8 +110,6 @@
         <a-col :span="1"></a-col>
         <a-col :span="4" class="left-txt">文件保存位置：</a-col>
         <a-col :span="4">
-          <a-select :value="saveDirectory" class="select"/>
-
           <a-select
               :value="saveDirectory"
               class="select"
@@ -246,27 +244,29 @@
             <a-row>
               <a-col>
                 <a-radio :value="1">摄像头</a-radio>
-                <a-select class="select" default-value="受电弓">
-                  <a-select-option value="受电弓">
-                    受电弓
-                  </a-select-option>
-                  <a-select-option value="转向架">
-                    转向架
-                  </a-select-option>
-                  <a-select-option value="车厢">
-                    车厢
+                <a-select
+                    :value="supervise.name"
+                    class="select"
+                    @change="onSuperviseSelectChange">
+                  <!--:key只能绑定string，number.不能绑定对象  :value可以绑定对象-->
+                  <a-select-option
+                      v-for="(item,index) of superviseList"
+                      :key="index"
+                  >
+                    {{ item.name }}
                   </a-select-option>
                 </a-select>
                 <a-radio :value="2" style="margin-left: 10px">监视物</a-radio>
-                <a-select class="select" default-value="受电弓">
-                  <a-select-option value="受电弓">
-                    受电弓
-                  </a-select-option>
-                  <a-select-option value="转向架">
-                    转向架
-                  </a-select-option>
-                  <a-select-option value="车厢">
-                    车厢
+                <a-select
+                    :value="device.name"
+                    class="select"
+                    @change="onDeviceSelectChange">
+                  <!--:key只能绑定string，number.不能绑定对象  :value可以绑定对象-->
+                  <a-select-option
+                      v-for="(item,index) of deviceList"
+                      :key="index"
+                  >
+                    {{ item.name }}
                   </a-select-option>
                 </a-select>
               </a-col>
@@ -276,13 +276,13 @@
       </div>
       <div style="flex-direction: row; justify-content: center;margin-top: 20px">
         <span>导出路径：</span>
-        <a-input style="width: 250px;margin-right: 10px" value="c:\\users\exportfile"></a-input>
-        <a-button>浏览</a-button>
+        <a-input style="width: 250px;margin-right: 10px" :value="inputPath"></a-input>
+        <a-button @click="test">浏览</a-button>
       </div>
 
       <template #footer>
         <a-button @click="onDownloadRecordResetBtnClicked">重置</a-button>
-        <a-button @click="downloadRecordModalVisible=false">取消</a-button>
+        <a-button @click="onDownloadRecordCancelBtnClicked">取消</a-button>
         <a-button @click="onDownloadRecordBtnClicked">导出</a-button>
       </template>
     </a-modal>
@@ -393,6 +393,8 @@ export default {
       storageConfigModalVisible: false,
       downloadRecordModalVisible: false,
 
+      inputPath:'c:\\users\\exportfile',
+
       diskNoList: ['0',],
       diskNo: '0',
 
@@ -418,6 +420,13 @@ export default {
       endTime: null,
 
       deviceType: 0,
+      deviceId: undefined,
+
+      superviseList: [],
+      supervise: {name: '', id: undefined},
+
+      deviceList: [],
+      device: {name: '', deviceId: undefined},
 
       count: 200,
       // 分页参数
@@ -437,15 +446,21 @@ export default {
       statusAll: true,
       statusNormal: false,
       statusTrouble: false,
-      status: '',
+      status: undefined,
 
       typeAll: true,
       typeLocal: false,
       typeExternal: false,
-      type: '',
+      type: undefined,
     }
   },
   methods: {
+    onDownloadRecordImgClicked() {
+      this.downloadRecordModalVisible = true;
+
+      this.getSuperviseList();
+      this.getDeviceList();
+    },
     getStorageConfigInfo() {
       request({
         url: '/api/storage/config',
@@ -462,25 +477,29 @@ export default {
       })
     },
     onStorageConfigResetBtnClicked(msg) {
+      //todo 接口未找到
       this.showMessage(msg)
     },
     onStorageConfigConfirmBtnClicked() {
       const params = {
-        saveInterval: this.saveInterval,
-        saveDirectory: this.saveDirectory,
-        saveDurationPantograph: this.saveDurationPantograph,
-        saveDurationCarriage: this.saveDurationCarriage,
-        saveDurationCard: this.saveDurationCard
+        storageConfig: {
+          saveInterval: this.saveInterval,
+          saveDirectory: this.saveDirectory,
+          saveDurationPantograph: this.saveDurationPantograph,
+          saveDurationCarriage: this.saveDurationCarriage,
+          saveDurationCard: this.saveDurationCard
+        }
       };
       reques({
         url: '/api/storage/config',
         method: 'put',
-        data: JSON.parse(JSON.stringify(params)),
+        data: JSON.parse(JSON.stringify(params)),//todo storageConfig
       }).then(res => {
         if (res.code == 0) {
           this.storageConfigModalVisible = false;
         }
       }).catch(err => {
+        this.$message.warn('网络请求错误')
       })
     },
     /**
@@ -489,9 +508,9 @@ export default {
      * @param code
      */
     changeBtnAcive(st, code) {
-      if (st == 0) {//status
-        this.type=code;
-        if (code === '') {
+      if (st == 0) {//status   空 全部，0 正常，1 故障
+        this.status = code;
+        if (code == undefined) {
           this.statusAll = true;
           this.statusNormal = this.statusTrouble = false;
         } else if (code === 0) {
@@ -501,15 +520,15 @@ export default {
           this.statusTrouble = true;
           this.statusAll = this.statusNormal = false;
         }
-      } else if (st == 1) {//type
+      } else if (st == 1) {//type  空 全部，0 本地，1 外挂
         this.type = code;
-        if (code === '') {
+        if (code == undefined) {
           this.typeAll = true;
           this.typeLocal = this.typeExternal = false;
         } else if (code === 0) {
           this.typeLocal = true;
           this.typeAll = this.typeExternal = false;
-        }else if (code === 1) {
+        } else if (code === 1) {
           this.typeExternal = true;
           this.typeAll = this.typeLocal = false;
         }
@@ -549,9 +568,41 @@ export default {
     },
     onRadioSelected(e) {
       this.deviceType = e.target.value;
+      if (e.target.value == 0) {//全部
+        // todo
+      } else if (e.target.value == 1) {//摄像头
+        this.deviceId = this.device.deviceId;
+      } else if (e.target.value == 2) {//监视物
+        this.deviceId = this.supervise.type;
+      }
     },
     onDownloadRecordResetBtnClicked() {
+      //todo
+      this.reset();
+    },
+    onDownloadRecordCancelBtnClicked() {
+      this.downloadRecordModalVisible = false;
 
+      this.reset();
+    },
+    reset(){
+      this.startDateString = '';
+      this.startDate = null;
+      this.startTimeString = '';
+      this.startTime = null;
+      this.endDateString = '';
+      this.endDate = null;
+      this.endTimeString = '';
+      this.endTime = null;
+
+      this.deviceType = 0;
+      this.deviceId = undefined;
+
+      this.superviseList = [];
+      this.supervise = {name: '', id: undefined};
+
+      this.deviceList = [];
+      this.device = {name: '', deviceId: undefined};
     },
     onDownloadRecordBtnClicked() {
       if (!isNotEmpty(this.startDateString)) {
@@ -573,28 +624,28 @@ export default {
       }
     },
     downloadRecord() {
-      const params = {
-        startTime: this.startDateString + ' ' + this.startTimeString,
-        endTime: this.endTimeString + ' ' + this.endTimeString,
-      };
+      const params = {};
+      params.startTime = this.startDateString + ' ' + this.startTimeString;
+      params.endTime = this.endTimeString + ' ' + this.endTimeString;
       params.deviceType = this.deviceType;
-      if (this.deviceType == 1) {
-        //todo
-        params.deviceId = '';
-      }
-      if (this.deviceType == 2) {
-        //todo
-        params.deviceId = '';
-      }
-
+      params.deviceId = this.deviceId;
       request({
         url: '/api/record/download',
-
+        method: 'get',
+        params,
       }).then(res => {
         if (res.code == 0) {
-
+          const downloadUrl=res.data;
+          request({
+            url:downloadUrl
+          }).then(res=>{
+            if(res.code==0){
+              this.$message.info('下载成功')
+            }
+          }).catch(err=>{})
         }
       }).catch(err => {
+        this.$message.warn('网络请求失败')
       })
 
     },
@@ -604,9 +655,9 @@ export default {
         params: {
           page: this.pagination.current,
           count: this.count,
-          diskNo: '',
-          status: 0,
-          type: 0
+          diskNo: this.diskNo,
+          status: this.status,
+          type: this.type,
         }
       }).then(res => {
         if (res.code == 0) {
@@ -644,6 +695,12 @@ export default {
     onDiskNoSelectChange(index, option) {
       this.diskNo = this.diskNoList[index];
     },
+    onSuperviseSelectChange(index, option) {
+      this.supervise = this.superviseList[index];
+    },
+    onDeviceSelectChange(index, option) {
+      this.device = this.deviceList[index];
+    },
     onSaveIntervalSelectChange(index, option) {
       this.saveInterval = this.saveIntervalList[index];
     },
@@ -659,24 +716,60 @@ export default {
         data: JSON.parse(JSON.stringify(params)),
       }).then(res => {
         if (res.code == 0) {
-          //todo
+          this.$message.info('初始化成功')
         }
       }).catch(err => {
+        this.$message.info('初始化失败')
       })
     },
     resetBtnClicked() {
-      this.changeBtnAcive(0, '');
-      this.changeBtnAcive(1, '');
+      this.changeBtnAcive(0, undefined);
+      this.changeBtnAcive(1, undefined);
 
       this.statusAll = true;
       this.statusNormal = false;
       this.statusTrouble = false;
-      this.status = '';
+      this.status = undefined;
 
       this.typeAll = true;
       this.typeLocal = false;
       this.typeExternal = false;
-      this.type = '';
+      this.type = undefined;
+    },
+    //  /api/supervise/list
+    getSuperviseList() {
+      request({
+        url: '/api/supervise/list',
+        method: 'get',
+      }).then(res => {
+        if (res.code == 0) {
+          this.superviseList = [];
+          this.superviseList.push(res.data);
+        }
+      }).catch(err => {
+        this.$message.warn('网络请求失败！')
+      })
+    },
+    // /api/device/query/devices
+    getDeviceList() {
+      request({
+        url: '/api/device/query/devices',
+        method: 'get',
+        params: {
+          page: 1,
+          count: 200,
+        }
+      }).then(res => {
+        if (res.code == 0) {
+          this.deviceList = [];
+          this.deviceList = res.data.list;
+        }
+      }).catch(err => {
+        this.$message.warn('网络请求失败！')
+      })
+    },
+    test(){
+      this.$message.info('更改下载路径需在浏览器设置')
     },
   },
   created() {
