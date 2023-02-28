@@ -124,6 +124,8 @@
       <!--        <a-button type="primary" ghost @click="hide(record)">编辑</a-button>-->
       <!--      </template>-->
     </a-table>
+
+    <!--所有modal独立显示-->
     <!--添加摄像头modal与编辑摄像头modal 共用-->
     <a-modal
         :title="modalTitle"
@@ -203,7 +205,7 @@
         </a-row>
       </div>
       <template #footer>
-        <button class="modal-footer-btn" @click="onModalClean">清空</button>
+        <button class="modal-footer-btn" @click="onModalClean()">清空</button>
         <button class="modal-footer-btn" @click="onAddModalCancel">取消</button>
         <button class="modal-footer-btn" style="background-color:green" @click="onAddModalConfirm">确定</button>
       </template>
@@ -634,10 +636,10 @@ export default {
         showSizeChanger: false // 是否可以改变pageSize
       },
       /*   /api/device/query/devices请求参数    start   */
-      keyword: undefined,
-      online: undefined,
-      inputCarriageNo: undefined,
-      selectedSuperviseType: {name: ''},
+      inputCarriageNo: undefined,//车厢号
+      selectedSuperviseType: {name: '', type: undefined},//监视类型  name用于select中显示，此处默认值设设置为''，type用于网络请求时的参数
+      online: true,//在线状态
+      keyword: undefined,//关键字
       isOnlineHasNextPage: true,
       isOffLineHasNextPage: true,
       /*   /api/device/query/devices请求参数    end   */
@@ -660,7 +662,7 @@ export default {
         superviseTargetName: '',//监视物名称
         carriageNo: '',//所在车厢
         id: undefined,//该值对应值为数据库ID
-        deviceId:undefined,//该值对应数值为设备国际ID
+        deviceId: undefined,//该值对应数值为设备国标ID
       },
       videoConfig: {
         encoder: 'H.264',
@@ -674,9 +676,10 @@ export default {
     }
   },
   methods: {
-    onPaginationClicked(e) {
-      this.pagination = e
-    },
+    /**
+     * 获取监视物类型列表
+     * 数据作为页面中"监视类型"select数据源
+     */
     getSuperviseTypeList() {
       request({
         url: '/api/supervise/type/list',
@@ -686,7 +689,7 @@ export default {
           this.superviseTypeList = resData;
         }
       }).catch(err => {
-
+        this.$message.error(err)
       })
     },
     getDevicesTableData() {
@@ -700,7 +703,7 @@ export default {
 
       const params = {};
       //必传参数
-      params.page = this.pagination.current;
+      params.page = this.pagination.current - 1;//该接口中，默认从0页开始,
       params.count = this.count;
       //非必传参数
       if (isNotEmpty(this.keyword)) {
@@ -719,71 +722,108 @@ export default {
         url: '/api/device/query/devices',
         params,
       }).then(res => {
-            if (res.code == 0) {
-              const resData = res.data;
-              const resTableData = resData.list;
-              const len = resTableData.length;
-              if (resData.isFirstPage) this.tableData = [];//第一次请求时清空
-              //确定是否有下一页数据
-              if (this.online) {
-                this.isOnlineHasNextPage = resData.hasNextPage;
-              } else {
-                this.isOfflineHasNextPage = resData.hasNextPage;
-              }
-
-              // key: 6,
-              // number: 6,
-              // name: '摄像头06',
-              // model: '',
-              // superviseTargetType: 6,
-              // superviseTargetTypeName: '受电弓6',
-              // superviseTargetId: 6,
-              // superviseTargetName: '受电弓6',
-              // carriageNo: 6,
-              // position: '受电弓位置01',
-              // ip: '192.168.1.6',
-              // onlineText: '在线',
-              // superviseTargetStatusText: '正常',
-              // operation: ''
-
-
-              // "id": 0,
-              // "deviceId": "",
-              // "name": "",
-              // "superviseTargetType": 0,
-              // "superviseTargetTypeName": "",
-              // "superviseTargetId": 0,
-              // "superviseTargetName": "",
-              // "carriageNo": 0,
-              // "position": "",
-              // "ip": "",
-              // "online": "",
-              // "superviseTargetStatus": 0,
-              // "superviseTargetStatusText": ""
-              for (let i = 1; i <= len; i++) {
-                const info = resTableData[i - 1];
-                info.model = '';//表格zhong需要显示该内容
-                info.operation = '';
-                if (info.online == 0) {
-                  info.onlineText = '离线'
-                } else if (info.online == 1) {
-                  info.onlineText = '在线'
+            //假数据
+            res = {
+              "code": 0,
+              "data": {
+                "endRow": 0,
+                "hasNextPage": false,
+                "hasPreviousPage": false,
+                "isFirstPage": true,
+                "isLastPage": true,
+                "list": [{
+                  "id": 0,
+                  "deviceId": "",
+                  "name": "",
+                  "superviseTargetType": 0,
+                  "superviseTargetTypeName": "",
+                  "superviseTargetId": 0,
+                  "superviseTargetName": "",
+                  "carriageNo": 0,
+                  "position": "",
+                  "ip": "",
+                  "online": "",
+                  "superviseTargetStatus": 0,
+                  "superviseTargetStatusText": ""
+                }],
+                "navigateFirstPage": 0,
+                "navigateLastPage": 0,
+                "navigatePages": 8,
+                "navigatepageNums": [],
+                "nextPage": 0,
+                "pageNum": 1,
+                "pageSize": 0,
+                "pages": 0,
+                "prePage": 0,
+                "size": 0,
+                "startRow": 0,
+                "total": 0
+              },
+              "message": "成功"
+            }
+            try {
+              if (res.code == 0) {
+                const resData = res.data;
+                const resTableData = resData.list;
+                const len = resTableData.length;
+                if (resData.isFirstPage) this.tableData = [];//第一次请求时清空
+                //确定是否有下一页数据
+                if (this.online) {
+                  this.isOnlineHasNextPage = resData.hasNextPage;
+                } else {
+                  this.isOfflineHasNextPage = resData.hasNextPage;
                 }
-                //计算key、number
-                info.number = info.key = i;
-                // if (!resData.isLastPage) {
-                //   info.key = info.number = i + (this.page - 1) * this.count;
-                //   this.page++;
-                // } else {
-                //   info.key = info.number = i + this.page * this.count;
-                // }
-                this.tableData.push(info);
+                //表格中要求必须字段
+                // key: 6,
+                // number: 6,
+                // name: '摄像头06',
+                // model: '',
+                // superviseTargetType: 6,
+                // superviseTargetTypeName: '受电弓6',
+                // superviseTargetId: 6,
+                // superviseTargetName: '受电弓6',
+                // carriageNo: 6,
+                // position: '受电弓位置01',
+                // ip: '192.168.1.6',
+                // onlineText: '在线',
+                // superviseTargetStatusText: '正常',
+                // operation: ''
+
+                //接口返回数据结构
+                // "id": 0,
+                // "deviceId": "",
+                // "name": "",
+                // "superviseTargetType": 0,
+                // "superviseTargetTypeName": "",
+                // "superviseTargetId": 0,
+                // "superviseTargetName": "",
+                // "carriageNo": 0,
+                // "position": "",
+                // "ip": "",
+                // "online": "",
+                // "superviseTargetStatus": 0,
+                // "superviseTargetStatusText": ""
+                for (let i = 1; i <= len; i++) {
+                  const info = resTableData[i - 1];
+                  info.number = info.key = i;//计算key、number
+                  info.model = '';//表格zhong需要显示该内容
+                  info.operation = '';
+                  if (info.online == 0) {
+                    info.onlineText = '离线'
+                  } else if (info.online == 1) {
+                    info.onlineText = '在线'
+                  }
+                  this.tableData.push(info);
+                }
+                console.log('this.tableData:', this.tableData)
+                this.pagination.total = this.tableData.length;
               }
-              this.pagination.total = this.tableData.length;
+            } catch (e) {
+              this.$message.error(e)
             }
           }
       ).catch(err => {
-
+        this.$message.error(err)
       })
     },
     getSuperviseList() {
@@ -793,10 +833,23 @@ export default {
         if (res.code == 0) {
           const resData = res.data;
           this.superviseList = resData;
+          //接口返回数据格式
+          // "id": 0,//id
+          // "name": "",//监视物名称
+          // "type": 0,//监视物类型
+          // "typeName": "",//监视物类型名称
+          // "carriageNo": 0,//监视物所在车厢
+          // "address": "",//安装位置
+          // "status": 0,//状态，0-正常，转向架异常（1-温度异常，2-检测到异物，3-部件缺失），受电弓姿态异常（100-降弓，101-升弓），受电弓实体异常（201-受电弓燃弧、202-受电弓异物、203-受电弓变形、204-右弓角缺失、205-左弓角缺失），受电弓温度异常（300-受电弓温度异常，statusText字段补充温度范围）
+          // "statusText": "",//安装位置
+          // "description": ""//描述
         }
       }).catch(err => {
 
       })
+    },
+    onPaginationClicked(e) {
+      this.pagination = e
     },
     refreshTable() {
       // this.isAllActive = true;
@@ -838,6 +891,7 @@ export default {
       this.add.superviseTargetName = this.tableData[selectedRowRadioKey - 1].superviseTargetName//select显示用
       this.add.carriageNo = this.tableData[selectedRowRadioKey - 1].carriageNo;//select显示用 //网络请求参数
       this.add.id = this.tableData[selectedRowRadioKey - 1].id;//select显示用 //网络请求路径
+      this.add.deviceId=this.tableData[selectedRowRadioKey - 1].deviceId;
     },
     setAddVideoConfig(resData) {
       if (!resData) {
@@ -934,9 +988,14 @@ export default {
       this.add.superviseTargetId = this.superviseList[index].id;
     },
     /**
-     * 将this.add{}和selectedRowRadioKeys重置
+     * 将add{}、videoConfig{}、modalTitle、selectedRowRadioKeys重置
      */
     onModalClean() {
+      //编辑摄像头modal中，点击"取消"应恢复至用户所选择设备信息，不应做清空设置
+      if(this.modalTitle==='编辑摄像头'){
+        this.setAdd()
+        return;
+      }
       this.add.addInputName = '';
       this.add.addInputIp = '';
       this.add.addInputPosition = '';
@@ -946,7 +1005,7 @@ export default {
       this.add.superviseTargetName = '';
       this.add.carriageNo = '';
       this.add.id = undefined;
-      this.add.deviceId=undefined;
+      this.add.deviceId = undefined;
 
       this.videoConfig.encoder = '';
       this.videoConfig.width = 0;
@@ -956,6 +1015,8 @@ export default {
       this.videoConfig.saturation = 0;
 
       this.selectedRowRadioKeys = [];//清空radio
+
+      this.modalTitle='';
     },
     onAddModalCancel() {
       this.onModalClean();
@@ -972,7 +1033,9 @@ export default {
         const params = {
           ip: this.add.addInputIp,
         };
+        if (isNotEmpty(this.add.deviceId)) params.deviceId = this.add.deviceId;
         if (isNotEmpty(this.add.addInputName)) params.name = this.add.addInputName;
+
         if (isNotEmpty(this.add.superviseTargetType)) params.superviseTargetType = this.add.superviseTargetType;
         if (isNotEmpty(this.add.superviseTargetId)) params.superviseTargetId = this.add.superviseTargetId;
         if (isNotEmpty(this.add.carriageNo)) params.carriageNo = this.add.carriageNo;
@@ -987,6 +1050,8 @@ export default {
             this.refreshTable();
           }
         }).catch(err => {
+          this.onAddModalCancel();
+          this.$message.error(err)
 
         })
       } else {
@@ -1013,14 +1078,14 @@ export default {
     },
     onAddBtnClicked(title) {
       this.modalTitle = title;
-      if (title === '编辑摄像头') {
+      if (this.modalTitle === '编辑摄像头') {
         if (this.selectedRowRadioKeys.length == 1) {
           this.setAdd();
           this.addModalVisible = true;
         } else if (this.selectedRowRadioKeys.length == 0) {
           this.$message.warn('请选择一个设备')
         }
-      } else if (title === '添加摄像头') {
+      } else if (this.modalTitle === '添加摄像头') {
         this.addModalVisible = true;
       }
     },
@@ -1060,17 +1125,15 @@ export default {
     },
     onCamInfoImgClicked(value, record, index) {
       //点击img的时候确定所选设备的id、deviceId
-      this.add.id=record.id;
-      this.add.deviceId=record.deviceId;
-      //todo 调试时使用
+      this.add.id = record.id;
+      this.add.deviceId = record.deviceId;
       this.camInfoModalVisible = true;
       request({
-        url: '/api/device/query/devices/' + this.add.id
+        url: '/api/device/query/devices/' + this.add.id,
+        method:'get'
       }).then(res => {
         if (res.code == 0) {
           this.setViewVideoConfig(res.data)
-          //todo
-          // this.camInfoModalVisible = true;
         }
       }).catch(err => {
         this.$message.warn('数据请求失败！')
@@ -1082,25 +1145,6 @@ export default {
     onCamInfoBtnClicked() {
       this.camInfoModalVisible = false;
       this.onModalClean()
-    },
-    onVideoConfigImgClicked(value, record, index) {
-      //点击img的时候确定所选设备的id、deviceId
-      this.add.id=record.id;
-      this.add.deviceId=record.deviceId;
-      //todo 调试时使用
-      this.videoConfigModalVisible = true;
-      request({
-        url:'/api/device/query/videoConfig/'+this.add.deviceId,
-        method:'get',
-      }).then(res=>{
-        if(res.code==0){
-          this.setEditVideoConfig(res.data)
-          //todo
-          // this.videoConfigModalVisible = true;
-        }
-      }).catch(err=>{
-        this.$message.warn('数据请求失败！')
-      })
     },
     onRemoteCtrlClicked(value, record, index, flag) {
       let url = '';
@@ -1128,20 +1172,64 @@ export default {
     onSaturationPercentChange(per) {
       this.videoConfig.saturation = per;
     },
+
+    onVideoConfigImgClicked(value, record, index) {
+      //点击img的时候确定所选设备的id、deviceId
+      this.add.id = record.id;
+      this.add.deviceId = record.deviceId;
+      //todo 调试时使用
+      this.videoConfigModalVisible = true;
+      request({
+        url: '/api/device/query/videoConfig/' + this.add.deviceId,
+        method: 'get',
+      }).then(res => {
+        if (res.code == 0) {
+          this.setEditVideoConfig(res.data)
+        }
+      }).catch(err => {
+        this.$message.warn('数据请求失败！')
+      })
+    },
     /**
      * 恢复默认值Btn
      */
     onVideoConfigDefaultValueBtnClicked() {
-      const params={};
-      params.encoder=this.videoConfig.encoder;
-      params.width=this.videoConfig.width;
-      params.height=this.videoConfig.height;
-      params.brightness=this.videoConfig.brightness;
-      params.contrast=this.videoConfig.contrast;
-      params.saturation=this.videoConfig.saturation;
+      this.resetVideoConfig()
+    },
+    onVideoConfigResetBtnClicked() {
+      this.resetVideoConfig()
+    },
+    /**
+     * 重置视频配置信息
+     * 视频图像设置modal中"恢复默认值"、"重置"按钮都使用该方法
+     */
+    resetVideoConfig(){
+      request({
+        url: 'api/device/query/videoConfig/' + this.add.deviceId + '/reset',
+        method: 'put',
+      }).then(res => {
+        if (res.code == 0) {
+          this.$message.info(res.data);
+        }
+      }).catch(err => {
+        this.$message.error(err);
+      })
+    },
+    onVideoConfigCancelBtnClicked() {
+      this.onModalClean();
+      this.videoConfigModalVisible = false;
+    },
+    onVideoConfigConfirmBtnClicked() {
+      const params = {};
+      params.encoder = this.videoConfig.encoder;
+      params.width = this.videoConfig.width;
+      params.height = this.videoConfig.height;
+      params.brightness = this.videoConfig.brightness;
+      params.contrast = this.videoConfig.contrast;
+      params.saturation = this.videoConfig.saturation;
       request({
         url: '/api/device/query/videoConfig/' + this.add.deviceId,//设备国际ID
-        method:'post',
+        method: 'post',
         data: JSON.parse(JSON.stringify(params)),
       }).then(res => {
         if (res.code == 0) {
@@ -1149,35 +1237,18 @@ export default {
           this.$message.info('更新视频配置信息成功');
         }
       }).catch(err => {
+        this.$message.error(err)
       })
     },
-    onVideoConfigCancelBtnClicked() {
-      this.onModalClean();
-      this.videoConfigModalVisible = false;
-    },
-    onVideoConfigResetBtnClicked() {
-      this.$message.error('接口未找到')
-      //todo
-      // request({
-      //   url: 'api/device/query/videoConfig/' + this.add.deviceId + '/update',
-      //   method:'post',
-      //   data:{}
-      // }).then(res => {
-      //   if (res.code == 0) {
-      //   }
-      // }).catch(err => {
-      // })
-    },
-    onVideoConfigConfirmBtnClicked() {
-      this.$message.error('接口未找到')
-      //todo
-      // this.onVideoConfigResetBtnClicked()
-    },
+
   },
   created() {
+    //主页面初始化时，请求"监视类型"select中的数据源
     this.getSuperviseTypeList();
-    this.getSuperviseList();
+    //主页面初始化时，请求table中的数据源
     this.getDevicesTableData();
+    //添加、编辑摄像头modal中"监视物"select中数据源
+    this.getSuperviseList();
   }
 }
 </script>

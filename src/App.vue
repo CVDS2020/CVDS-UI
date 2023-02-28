@@ -19,6 +19,7 @@
           <a-button type="primary" @click="login">登陆</a-button>
         </template>
       </a-modal>
+
     </div>
   </a-config-provider>
 </template>
@@ -44,7 +45,7 @@ export default {
     return {
       flag: 0,
       locale: zhCN,
-      // modalVisible: true,
+      // modalVisible: this.$store.state.loginVisible,
       modalVisible: false,
       userName: 'admin',
       pwd: 'admin',
@@ -57,14 +58,15 @@ export default {
         method: 'get',
         params: {
           username: this.userName,
-          password: this.pwd.MD5(32)
+          password: this.pwd.MD5(32),
+          terminal:this.$store.state.user.terminal,
         }
       }).then(res => {
         if (res.code == 0) {
-          this.modalVisible = false;
-          // this.$router.replace('/dashboard');
+          this.$store.commit('setLoginModalVisible',false);
+          this.modalVisible=this.$store.state.loginVisible;
           this.$store.commit('setUserInfo', res.data);
-          // alert('登陆成功！')
+          this.$router.replace('/dashboard');
         }
       }).catch(err => {
         // console.log(err);
@@ -73,40 +75,40 @@ export default {
     },
   },
   created() {
-    let arr = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-    delete arr[3];
-    console.log(arr.length)
-    console.log(arr)
-    delete arr[5]
-    let arr1 = arr.filter(d => d)
-    console.log(arr)
-    console.log(arr1)
-    if (this.flag) {
-      console.log('if this.flag')
-    } else {
-      console.log('else this.flag')
-    }
-    if (!this.flag) {
-      console.log('!this.flag')
-    } else {
-      console.log('else !this.flag')
-    }
-    let a=[1,2,3,4,5,6,1,2];
-    let s=new Set(a);
-    let na=Array.from(s)
-    console.log('a:',a,'na:',na)
-
-    let m=new Map();
-    m.set('a',1);
-    m.set('a',1);
-    m.set('b',2);
-    console.log('m:',m)
-    let ma=[];
-    for(let [key,value] of m.entries()){
-      let obj={username:key,userid:value}
-      ma.push(obj);
-    }
-    console.log('ma:',ma);
+    // let arr = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+    // delete arr[3];
+    // console.log(arr.length)
+    // console.log(arr)
+    // delete arr[5]
+    // let arr1 = arr.filter(d => d)
+    // console.log(arr)
+    // console.log(arr1)
+    // if (this.flag) {
+    //   console.log('if this.flag')
+    // } else {
+    //   console.log('else this.flag')
+    // }
+    // if (!this.flag) {
+    //   console.log('!this.flag')
+    // } else {
+    //   console.log('else !this.flag')
+    // }
+    // let a=[1,2,3,4,5,6,1,2];
+    // let s=new Set(a);
+    // let na=Array.from(s)
+    // console.log('a:',a,'na:',na)
+    //
+    // let m=new Map();
+    // m.set('a',1);
+    // m.set('a',1);
+    // m.set('b',2);
+    // console.log('m:',m)
+    // let ma=[];
+    // for(let [key,value] of m.entries()){
+    //   let obj={username:key,userid:value}
+    //   ma.push(obj);
+    // }
+    // console.log('ma:',ma);
   }
 }
 </script>

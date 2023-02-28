@@ -22,6 +22,7 @@
           <span class="height line-height">（东经）</span>
         </div>
       </div>
+      <div style="background-color: #666666;height: 1px"></div>
     </a-card>
   </a-layout>
 </template>

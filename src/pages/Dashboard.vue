@@ -54,10 +54,10 @@
         :data-source="tableData"
         bordered
         @change="onPaginationClicked"
-        :pagination="pagination">
-<!--        size="small"-->
-<!--        :pagination="false"-->
-<!--        :scroll="{y: 300 }">-->
+        :pagination="pagination"
+        size="small"
+        :scroll="{y: 300 }">
+    <!--        :pagination="false"-->
       <template #alarmPriority="value,record,index">
         <div>
           <img v-if="value==='三级'" class="img" src="../assets/img/icon-alarm-blue.png" alt="">
@@ -175,6 +175,62 @@ const tableData = [
     alarmDescription: '04摄像头，受电弓故障，请确认并联系人员检修',
     alreadyTime: '未处理',
   },
+
+
+  {
+    key: 7,
+    number: 7,
+    alarmTime: '2022/10/22 10:12:36',
+    alarmType: '故障类别',
+    alarmPriority: '三级',
+    alarmDescription: '摄像头05已关闭，请检查',
+    alreadyTime: '',
+  },
+  {
+    key: 8,
+    number: 8,
+    alarmTime: '2022/10/22 10:12:36',
+    alarmType: '故障类别',
+    alarmPriority: '一级',
+    alarmDescription: '摄像头03已关闭，请检查',
+    alreadyTime: '已处理',
+  },
+  {
+    key: 9,
+    number: 9,
+    alarmTime: '2022/10/22 10:12:36',
+    alarmType: '故障类别',
+    alarmPriority: '二级',
+    alarmDescription: '摄像头01被部分遮挡，请检查',
+    alreadyTime: '',
+  },
+  {
+    key: 10,
+    number: 10,
+    alarmTime: '2022/10/22 10:12:36',
+    alarmType: '故障类别',
+    alarmPriority: '二级',
+    alarmDescription: '摄像头02故障，请检查',
+    alreadyTime: '未处理',
+  },
+  {
+    key: 11,
+    number: 11,
+    alarmTime: '2022/10/22 10:12:36',
+    alarmType: '故障类别',
+    alarmPriority: '一级',
+    alarmDescription: '存储空间不足，自动停止保存视频',
+    alreadyTime: '未处理',
+  },
+  {
+    key: 12,
+    number: 12,
+    alarmTime: '2022/10/22 10:12:36',
+    alarmType: '故障类别',
+    alarmPriority: '一级',
+    alarmDescription: '04摄像头，受电弓故障，请确认并联系人员检修',
+    alreadyTime: '未处理',
+  },
 ];
 
 export default {
@@ -193,13 +249,13 @@ export default {
       // 分页参数
       pagination: {
         current: 1,
-        pageSize: 10,
+        pageSize: 1000,
         total: tableData.length,
         // pageSizeOptions: ['2', '4', '6'], // 可选的页面显示条数
         // showTotal: (total, range) => {
         //   return range[0] + '-' + range[1] + ' 共' + total + '条'
         // }, // 展示每页第几条至第几条和总数
-        hideOnSinglePage: false, // 只有一页时是否隐藏分页器
+        hideOnSinglePage: true, // 只有一页时是否隐藏分页器
         showQuickJumper: false, // 是否可以快速跳转至某页
         showSizeChanger: false // 是否可以改变pageSize
       },
@@ -237,7 +293,7 @@ export default {
     },
     getLastAlarm() {
       request({
-        url: '/api/alarm/getLast'
+        url: '/api/alarm/last'
       }).then(res => {
         if (res.code == 0) {
 
@@ -261,6 +317,7 @@ export default {
               // "alreadyTime": "",
               // "alreadyUser": 0,
               // "alreadyUserName": ""
+          //最近24小时告警信息，不存在分页查询情况，故在该处清除tableData
           this.tableData = [];
           const resData = res.data;
           const len = res.data.length;

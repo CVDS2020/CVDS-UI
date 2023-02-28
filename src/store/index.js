@@ -11,29 +11,34 @@ Vue.use(Vuex)
 
 // 2.创建对象
 const state = {
-    user:{
-       username:'',
-        roleName:'',
-        loginTime:'',
-        loginDev:'',
-        ip:'',
+    user: {
+        username: '',//用户名
+        roleName: '',//用户角色
+        loginTime: '',
+        loginDev: '',
+        ip: '',
+        terminal:'',//'WEB'
     },
-    loginVisible:false
+    loginVisible: true
 }
 const store = new Vuex.Store({
     state,
-    mutations:{
-        setUserInfo(state,resData){
-            state.user.username=resData.username;
-            state.user.roleName=resData.role.name;
-            state.user.loginTime=moment(new Date()).format('YYYY-MM-DD HH:mm:ss');
-            state.user.loginDev='';
-            state.user.ip='';
-        }
+    mutations: {
+        setUserInfo(state, resData) {
+            state.user.username = resData.username;
+            state.user.roleName = resData.role.name;
+            state.user.loginTime = resData.loginTime;
+            state.user.loginDev = '';
+            state.user.ip = resData.role.ip;
+            state.user.terminal=resData.terminal;
+        },
+        setLoginModalVisible(state,visible){
+            state.loginVisible=visible;
+        },
 
     },
-    actions:{},
-    getters:{},
+    actions: {},
+    getters: {},
 })
 
 // 3.导出store独享

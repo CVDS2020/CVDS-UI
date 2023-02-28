@@ -393,7 +393,7 @@ export default {
       storageConfigModalVisible: false,
       downloadRecordModalVisible: false,
 
-      inputPath:'c:\\users\\exportfile',
+      inputPath: 'c:\\users\\exportfile',
 
       diskNoList: ['0',],
       diskNo: '0',
@@ -455,11 +455,101 @@ export default {
     }
   },
   methods: {
-    onDownloadRecordImgClicked() {
-      this.downloadRecordModalVisible = true;
+    getTableData() {
+      const params = {};
+      //必传参数
+      params.page = this.pagination.current;
+      params.count = this.count;
+      //非必传参数
+      if (isNotEmpty(this.diskNo)) {
+        params.diskNo = this.diskNo;
+      }
+      if (isNotEmpty(this.status)) {
+        params.status = this.status;
+      }
+      if (isNotEmpty(this.type)) {
+        params.type = this.type;
+      }
+      request({
+        url: '/api/storage/disk/list',
+        method:'get',
+        params,
+      }).then(res => {
+        if (res.code == 0) {
+          try {
+            this.diskNoList = [];
+            // "diskNo": "",
+            // "type": 0,
+            // "status": 0,
+            // "capacity": 0,
+            // "usedCapacity": 0
 
-      this.getSuperviseList();
-      this.getDeviceList();
+            // key: '1',
+            // number: '1',
+            // diskNo: '01',
+            // type: 0,
+            // typeName: '磁盘',
+            // status: '正常',
+            // capacity: '2048',
+            // usedCapacity: '512',
+            // freeCapacity: '1536',
+            // operation: ''
+
+            if (res.data.constructor === Array) {//判断后端返回数据是一个array还是一个object
+              let len = res.data.length;
+              for (let i = 1; i < len; i++) {
+                let info = res.data[i];
+                info.key = info.number = i;
+                if (info.type && info.type == 0) {
+                  info.typeName = '本地';
+                } else if (info.type && info.type == 1) {
+                  info.typeName = '外挂';
+                } else {
+                  info.typeName = '';
+                }
+                this.tableData.push(info)
+                if (res.data[i].diskNo) this.diskNoList.push(res.data[i].diskNo);
+              }
+            } else if(res.data.constructor === Object){
+              let info = res.data;
+              info.key = info.number = 1;
+              if (info.type && info.type == 0) {
+                info.typeName = '本地';
+              } else if (info.type && info.type == 1) {
+                info.typeName = '外挂';
+              } else {
+                info.typeName = '';
+              }
+
+              this.tableData.push(info)
+              if (res.data.diskNo) this.diskNoList.push(res.data.diskNo);
+            }
+          } catch (e) {
+            this.$message.error(e)
+          }
+        }
+      }).catch(err => {
+        this.$message.error(err)
+      })
+    },
+    resetBtnClicked() {
+      this.changeBtnAcive(0, undefined);
+      this.changeBtnAcive(1, undefined);
+
+      this.statusAll = true;
+      this.statusNormal = false;
+      this.statusTrouble = false;
+      this.status = undefined;
+
+      this.typeAll = true;
+      this.typeLocal = false;
+      this.typeExternal = false;
+      this.type = undefined;
+    },
+
+    onStorConfBtnClicked() {
+      this.getStorageConfigInfo()
+      this.storageConfigModalVisible = true;
     },
     getStorageConfigInfo() {
       request({
@@ -474,12 +564,32 @@ export default {
           if (res.data.saveDurationCard) this.saveDurationCard = res.data.saveDurationCard;
         }
       }).catch(err => {
+        this.$message.error(err)
       })
     },
+
+
     onStorageConfigResetBtnClicked(msg) {
-      //todo 接口未找到
-      this.showMessage(msg)
+      request({
+        url:'/api/storage/config/reset',
+        method:'put'
+      }).then(res=>{
+        if(res.code==0){
+          this.$message.info(res.message)
+        }
+      }).catch(err=>{
+        this.$message.error(err)
+      })
     },
+
+    onDownloadRecordImgClicked() {
+      this.downloadRecordModalVisible = true;
+
+      this.getSuperviseList();
+      this.getDeviceList();
+    },
+
+
     onStorageConfigConfirmBtnClicked() {
       const params = {
         storageConfig: {
@@ -492,8 +602,8 @@ export default {
       };
       reques({
         url: '/api/storage/config',
-        method: 'put',
-        data: JSON.parse(JSON.stringify(params)),//todo storageConfig
+        method: 'post',
+        data: JSON.parse(JSON.stringify(params)),
       }).then(res => {
         if (res.code == 0) {
           this.storageConfigModalVisible = false;
@@ -541,10 +651,7 @@ export default {
     onRadioChange(e) {
       console.log('radio checked', e.target.value);
     },
-    onStorConfBtnClicked() {
-      this.getStorageConfigInfo()
-      this.storageConfigModalVisible = true;
-    },
+
     showMessage(msg) {
       this.$message.info(msg)
     },
@@ -585,7 +692,7 @@ export default {
 
       this.reset();
     },
-    reset(){
+    reset() {
       this.startDateString = '';
       this.startDate = null;
       this.startTimeString = '';
@@ -635,63 +742,22 @@ export default {
         params,
       }).then(res => {
         if (res.code == 0) {
-          const downloadUrl=res.data;
+          const downloadUrl = res.data;
           request({
-            url:downloadUrl
-          }).then(res=>{
-            if(res.code==0){
+            url: downloadUrl
+          }).then(res => {
+            if (res.code == 0) {
               this.$message.info('下载成功')
             }
-          }).catch(err=>{})
+          }).catch(err => {
+          })
         }
       }).catch(err => {
         this.$message.warn('网络请求失败')
       })
 
     },
-    getTableData() {
-      request({
-        url: '/api/storage/disk/list',
-        params: {
-          page: this.pagination.current,
-          count: this.count,
-          diskNo: this.diskNo,
-          status: this.status,
-          type: this.type,
-        }
-      }).then(res => {
-        if (res.code == 0) {
-          this.diskNoList = [];
-          this.diskNoList[0] = res.data.diskNo;
-          // "diskNo": "",
-          // "type": 0,
-          // "status": 0,
-          // "capacity": 0,
-          // "usedCapacity": 0
 
-          // key: '1',
-          // number: '1',
-          // diskNo: '01',
-          // type: 0,
-          // typeName: '磁盘',
-          // status: '正常',
-          // capacity: '2048',
-          // usedCapacity: '512',
-          // freeCapacity: '1536',
-          // operation: ''
-
-          const info = res.data;
-          info.key = info.number = 1;
-          if (info.type && info.type == 0) {
-            info.typeName = '本地';
-          } else if (info.type && info.type == 1) {
-            info.typeName = '外挂';
-          }
-          this.tableData.push(info)
-        }
-      }).catch(err => {
-      })
-    },
     onDiskNoSelectChange(index, option) {
       this.diskNo = this.diskNoList[index];
     },
@@ -721,20 +787,6 @@ export default {
       }).catch(err => {
         this.$message.info('初始化失败')
       })
-    },
-    resetBtnClicked() {
-      this.changeBtnAcive(0, undefined);
-      this.changeBtnAcive(1, undefined);
-
-      this.statusAll = true;
-      this.statusNormal = false;
-      this.statusTrouble = false;
-      this.status = undefined;
-
-      this.typeAll = true;
-      this.typeLocal = false;
-      this.typeExternal = false;
-      this.type = undefined;
     },
     //  /api/supervise/list
     getSuperviseList() {
@@ -768,12 +820,12 @@ export default {
         this.$message.warn('网络请求失败！')
       })
     },
-    test(){
+    test() {
       this.$message.info('更改下载路径需在浏览器设置')
     },
   },
   created() {
-
+    this.getTableData();
   },
 }
 </script>
