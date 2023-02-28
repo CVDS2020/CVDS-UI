@@ -194,20 +194,34 @@ export default {
         if(res.code==0){
 
         }
-      }).catch(err=>{})
+      }).catch(err=>{ this.$message.error(err.code+'!  '+err.message)})
     },
     getSysInfo() {
       request({
         url: '/api/system/info',
       }).then(res => {
+        // {
+        //   "code": 0,
+        //     "data": {
+        //   "systemInfo": {
+        //     "firmwareVersion": "1.0",
+        //         "manufacturerCode": "CSS-CVDS-CMU",
+        //         "softwareVersion": "1.0",
+        //         "typeCode": "cvds-cmu"
+        //   }
+        // },
+        //   "message": "成功"
+        // }
         if (res.code == 0) {
-          this.typeCode = res.data.typeCode;
-          this.manufacturerCode = res.data.manufacturerCode;
-          this.softwareVersion = res.data.softwareVersion;
-          this.firmwareVersion = res.data.firmwareVersion;
+          this.typeCode = res.data.systemInfo.typeCode;
+          this.manufacturerCode = res.data.systemInfo.manufacturerCode;
+          this.softwareVersion = res.data.systemInfo.softwareVersion;
+          this.firmwareVersion = res.data.systemInfo.firmwareVersion;
+        }else{
+          this.$message.error(res.message)
         }
       }).catch(err => {
-
+        this.$message.error(err.code+'!  '+err.message)
       })
 
     },
@@ -230,15 +244,19 @@ export default {
         data:JSON.parse(JSON.stringify(params)),
       }).then(res=>{
         if(res.code==0){
-
+          this.$message.info('校时成功');
+        }else{
+          this.$message.error(res.message);
         }
-      }).catch(err=>{})
+      }).catch(err=>{ this.$message.error(err.code+'!  '+err.message)})
     },
     onBlur(){
       this.timer=setInterval(this.getCurrentTime,1000)
+      // this.correctionType=0;
     },
     onFocus(){
-      clearInterval(this.timer)
+      clearInterval(this.timer);
+      // this.correctionType=1;
     },
     onStartDateChange(date, dateString) {
       this.startDateString = dateString;
@@ -258,15 +276,41 @@ export default {
       this.endTime = this.moment(timeString, this.timeFormat)
     },
     onCheckboxChange(checkeList){
-      console.log('=====>',checkeList)
-      this.typeValue=checkeList;
+      this.typeValue=[];
+      checkeList.forEach(item=>{
+        if(item===plainOptions[0])this.typeValue.push(0);
+        else if(item===plainOptions[1])this.typeValue.push(1);
+        else if(item===plainOptions[2])this.typeValue.push(2);
+      })
     },
     onDownloadBtnClicked(){
+      if (!isNotEmpty(this.startDateString)) {
+        this.$message.warn('开始日期不能为空！');
+        return;
+      }
+      if (!isNotEmpty(this.startTimeString)) {
+        this.$message.warn('开始时间不能为空！');
+        return;
+      }
+      if (!isNotEmpty(this.endDateString)) {
+        this.$message.warn('结束日期不能为空！');
+        return;
+      }
+      if (!isNotEmpty(this.endTimeString)) {
+        this.$message.warn('结束时间不能为空！');
+        return;
+      }
+      const s = this.startDateString + ' ' + this.startTimeString;
+      const e = this.endDateString + ' ' + this.endTimeString;
+      if (s > e) {
+        this.cleanPicker();
+        this.$message.warn("开始时间不能大于结束时间");
+        return;
+      }
       const params={
         startTime: this.startDateString+' '+this.startTimeString,
         endTime:this.endTimeString+' '+this.endTimeString,
       }
-      //todo 参数type待确定
       params.type=this.typeValue;
 
       request({
@@ -274,12 +318,24 @@ export default {
         params,
       }).then(res => {
         if(res.code==0){
-
+          this.$message.info('日志下载成功')
+        }else{
+          this.$message.error(res.message)
         }
-      }).catch(err=>{})
+      }).catch(err=>{ this.$message.error(err.code+'!  '+err.message)})
+    },
+    cleanPicker() {
+      this.startDateString = '';
+      this.startDate = null;
+      this.startTimeString = '';
+      this.startTime = null;
+      this.endDateString = '';
+      this.endDate = null;
+      this.endTimeString = '';
+      this.endTime = null;
     },
     onBrowseBtnclicked(){
-
+      this.$message.warn('下载路径仅可以通过浏览器下载，应用无法更改下载路径')
     },
   },
   created() {

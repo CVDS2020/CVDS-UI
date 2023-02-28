@@ -30,6 +30,7 @@ export function request(config) {
     }, err => {
         console.log("res err:")
         console.log(err);
+        return Promise.reject(err.response.data)
     })
 
     // 3.发送真正的网络请求

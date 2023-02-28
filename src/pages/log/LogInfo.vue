@@ -13,8 +13,8 @@
 </template>
 
 <script>
-import SysLog from "@/pages/SysLog";
-import OperationLog from "@/pages/OperationLog";
+import SysLog from "@/pages/log/SysLog";
+import OperationLog from "@/pages/log/OperationLog";
 import PageTitle from "@/components/PageTitle"
 
 export default {

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <page-title title="告警信息"></page-title>
+
     <div style="border: 1px solid #e6e6e6;border-radius: 3px;padding: 15px">
       <a-row style="align-items: baseline;">
         <a-col :span="2"></a-col>
@@ -43,34 +43,34 @@
       </a-row>
       <a-row style="margin-top: 15px">
         <a-col :span="2"></a-col>
-        <a-col :span="2" class="center-txt" style="text-align: right">故障类别：</a-col>
+        <a-col :span="2" class="center-txt" style="text-align: right">用户：</a-col>
         <a-col :span="4">
           <a-select
-              :value="alarmType"
+              :value="user.username"
               class="select"
-              @change="onTroubleTypeSelectChange">
+              @change="onUserSelectChange">
             <!--:key只能绑定string，number.不能绑定对象  :value可以绑定对象-->
             <a-select-option
-                v-for="(item,index) of alarmTypeList"
+                v-for="(item,index) of userList"
                 :key="index"
             >
-              {{ item}}
+              {{ item.username }}
             </a-select-option>
           </a-select>
         </a-col>
         <a-col :span="3"></a-col>
-        <a-col :span="2" class="center-txt" style="text-align: right">告警级别：</a-col>
+        <a-col :span="2" class="center-txt" style="text-align: right">授权终端：</a-col>
         <a-col :span="4">
           <a-select
-              :value="alarmPriority"
+              :value="terminal.username"
               class="select"
-              @change="onAlarmPrioritySelectChange">
+              @change="onTerminalSelectChange">
             <!--:key只能绑定string，number.不能绑定对象  :value可以绑定对象-->
             <a-select-option
-                v-for="(item,index) of alarmPriorityList"
+                v-for="(item,index) of terminalList"
                 :key="index"
             >
-              {{ item }}
+              {{ item.name }}
             </a-select-option>
           </a-select>
         </a-col>
@@ -81,29 +81,15 @@
         </a-col>
         <a-col :span="2"></a-col>
       </a-row>
-      <a-row style="margin-top: 15px">
-        <a-col :span="2"></a-col>
-        <a-col :span="2" class="center-txt" style="text-align: right">处理状态：</a-col>
-        <a-col :span="20">
-          <a-button :class="{btn:true,active:isAllActive}" @click="changeBtnAcive(-1)">全部</a-button>
-          <a-button :class="{btn:true,active:isUntreatedActive}" @click="changeBtnAcive(0)">未处理</a-button>
-          <a-button :class="{btn:true,active:isAlreadyActive}" @click="changeBtnAcive(1)">已处理</a-button>
-        </a-col>
-      </a-row>
     </div>
-    <div style="margin: 20px 0 10px 0">告警列表[共{{tableData.length}}条]</div>
+    <div style="margin: 20px 0 10px 0">信息列表[共{{ tableData.length }}条]</div>
     <a-table
         bordered
         :columns="columns"
         :data-source="tableData"
         @change="onPaginationClicked"
-        :pagination="pagination">
-      <template #already="value,record,index">
-        <div>
-          <span v-if="value==='未处理'" style="color: red">未处理</span>
-          <span v-else>{{value}}</span></div>
-      </template>
-    </a-table>
+        :pagination="pagination"
+    />
   </div>
 </template>
 
@@ -111,11 +97,54 @@
 import 'moment/locale/zh-cn';
 import locale from 'ant-design-vue/es/date-picker/locale/zh_CN';
 import moment from 'moment';
-import PageTitle from "@/components/PageTitle"
 import {request} from "@/network/request";
+
 function isNotEmpty(param) {
   return param && param != ''
 }
+// 日期格式化
+function parseTime(time, pattern) {
+  if (arguments.length === 0 || !time) {
+    return null
+  }
+  const format = pattern || '{y}-{m}-{d} {h}:{i}:{s}'
+  let date
+  if (typeof time === 'object') {
+    date = time
+  } else {
+    if ((typeof time === 'string') && (/^[0-9]+$/.test(time))) {
+      time = parseInt(time)
+    } else if (typeof time === 'string') {
+      time = time.replace(new RegExp(/-/gm), '/').replace('T', ' ').replace(new RegExp(/\.[\d]{3}/gm), '');
+    }
+    if ((typeof time === 'number') && (time.toString().length === 10)) {
+      time = time * 1000
+    }
+    date = new Date(time)
+  }
+  const formatObj = {
+    y: date.getFullYear(),
+    m: date.getMonth() + 1,
+    d: date.getDate(),
+    h: date.getHours(),
+    i: date.getMinutes(),
+    s: date.getSeconds(),
+    a: date.getDay()
+  }
+  const time_str = format.replace(/{(y|m|d|h|i|s|a)+}/g, (result, key) => {
+    let value = formatObj[key]
+    // Note: getDay() returns 0 on Sunday
+    if (key === 'a') {
+      return ['日', '一', '二', '三', '四', '五', '六'][value]
+    }
+    if (result.length > 0 && value < 10) {
+      value = '0' + value
+    }
+    return value || 0
+  })
+  return time_str
+}
+
 const columns = [
   {
     title: '编号',
@@ -126,91 +155,71 @@ const columns = [
   },
   {
     title: '时间',
-    dataIndex: 'alarmTime',
-    key: 'alarmTime',
-    align: 'center',
-    sorter: (a, b) => a.alarmTime >b.alarmTime,
-  },
-  {
-    title: '故障类别',
-    dataIndex: 'alarmType',
-    key: 'alarmType',
+    dataIndex: 'createTime',
+    key: 'createTime',
+    width: '300px',
+    sorter: (a, b) => a.createTime > b.createTime,
     align: 'center'
   },
   {
-    title: '告警级别',
-    dataIndex: 'alarmPriority',
-    key: 'alarmPriority',
-    align: 'center',
-    scopedSlots: {customRender: 'alarmPriority'},
-    sorter: (a, b) => a.alarmPriority >b.alarmPriority,
-  },
-  {
-    title: '故障详细内容',
-    key: 'alarmDescription',
-    dataIndex: 'alarmDescription',
+    title: '用户',
+    dataIndex: 'username',
+    key: 'username',
     align: 'center'
   },
   {
-    title: '处理确认',
-    key: 'already',
-    dataIndex: 'already',
-    align: 'center',
-    scopedSlots: {customRender: 'already'},
-    sorter: (a, b) => a.already > b.already,
+    title: '授权终端',
+    dataIndex: 'terminal',
+    key: 'terminal',
+    align: 'center'
   },
   {
-    title: '操作员',
-    key: 'alreadyUserName',
-    dataIndex: 'alreadyUserName',
-    align: 'center',
+    title: '操作',
+    dataIndex: 'operation',
+    key: 'operation',
+    align: 'center'
   },
-];
+  {
+    title: '详细内容',
+    dataIndex: 'content',
+    key: 'content',
+    align: 'center'
+  },
+]
 const tableData = [
   {
     key: 1,
     number: 1,
-    alarmTime: '2022-01-01 01:01:01',
-    alarmType:'',
-    alarmPriority:'二级警情',
-    alarmDescription:'收到徐教练咖啡',
-    already:'未处理',
-    alreadyUserName:'administator',
+    createTime: '2022-01-01 01:01:01',
+    username: 'admin',
+    terminal: 'sdfadsffgdfgsdfg',
+    operation: '登陆',
+    content: '详细内容阿水淀粉速度史蒂夫'
   },
   {
     key: 2,
     number: 2,
-    alarmTime: '2022-01-03 01:04:01',
-    alarmType:'',
-    alarmPriority:'一级警情',
-    alarmDescription:'收到徐教练咖啡',
-    already:'已处理',
-    alreadyUserName:'administator',
+    createTime: '2022-01-06 01:01:01',
+    username: 'admin',
+    terminal: 'sdfadsffgdfgsdfg',
+    operation: '登陆',
+    content: '详细内容阿水淀粉速度史蒂夫'
   },
   {
     key: 3,
     number: 3,
-    alarmTime: '2022-01-03 01:32:01',
-    alarmType:'',
-    alarmPriority:'三级警情',
-    alarmDescription:'收到徐教练咖啡',
-    already:'已处理',
-    alreadyUserName:'administator',
-  },
-  ]
+    createTime: '2022-01-05 01:01:01',
+    username: 'admin',
+    terminal: 'sdfadsffgdfgsdfg',
+    operation: '登陆定时发送到发送到发送地方',
+    content: '详细内容阿水淀粉速度史蒂夫'
+  }]
 export default {
-  name: "AlarmInfo",
-  components: {PageTitle},
+  name: "OperationLog",
   data() {
     return {
       columns,
       tableData,
-
-      isAllActive: true,//全部
-      isAlreadyActive: false,//已处理
-      isUntreatedActive: false,//未处理
-      already: -1,//-1全部 0未处理 1已处理
-
       allowClear: false,
       dateFormat: 'YYYY-MM-DD',
       timeFormat: 'HH:mm:ss',
@@ -223,11 +232,11 @@ export default {
       endTimeString: '',
       endTime: null,
 
-      alarmType:'',
-      alarmTypeList:[],
+      user: {username: '', id: undefined},
+      userList: [],
 
-      alarmPriority:'',
-      alarmPriorityList:[],
+      terminal: {},
+      terminalList: [],
 
       count: 200,
       // 分页参数
@@ -245,8 +254,7 @@ export default {
       },
     };
   },
-  computed: {
-  },
+  computed: {},
   methods: {
     moment,
     onStartDateChange(date, dateString) {
@@ -267,66 +275,100 @@ export default {
       this.endTime = this.moment(timeString, this.timeFormat)
     },
     getTableData() {
-      const params = {}
+      const params = {};
       params.page = this.pagination.current;
-      params.count = this.pagination.pageSize;
+      params.count = this.count;
       params.startTime = this.startDateString + ' ' + this.startTimeString;
       params.endTime = this.endDateString + ' ' + this.endTimeString;
-      if(isNotEmpty(this.alarmType)){
-        params.alarmType=this.alarmType;
+      params.type = 1;//0系统日志  1操作日志
+      if (isNotEmpty(this.user.id)) {
+        params.userId = this.user.id
       }
-      if(isNotEmpty(this.alarmPriority)){
-        params.alarmPriority=this.alarmPriority;
-      }
-      if (this.already == 0) {
-        params.already = false;
-      }else if(this.already==1){
-        params.already=true;
+      if (isNotEmpty(this.terminal.username)) {
+        params.terminal = this.terminal.username
       }
       request({
-        url: '/api/alarm/list',
+        url: '/api/log/list',
         params,
       }).then(res => {
         if (res.code == 0) {
+
           const resData = res.data;
           const resTableData = resData.list;
           const len = resTableData.length;
           if(res.data.isFirstPage)this.tableData=[]
 
+          // let userMap = new Map();//user select数据源去重
+          // let terminalMap = new Map();//terminal数据源去重
           for (let i = 1; i <= len; i++) {
-            // {
-            //   "id": "",
-            //     "deviceId": "",
-            //     "channelId": "",
-            //     "alarmPriority": "",
-            //     "alarmTime": "",
-            //     "alarmDescription": "",
-            //     "alarmType": "",
-            //     "createTime": "",
-            //     "alreadyTime": "",
-            //     "alreadyUser": 0,
-            //     "alreadyUserName": ""
-            // }
+            //列表设计数据结构
+            // key: 1,
+            // number: 1,
+            // createTime: '2022-01-01 01:01:01',
+            // username: 'admin',
+            // terminal: 'sdfadsffgdfgsdfg',
+            // operation: '登陆',
+            // content:'详细内容阿水淀粉速度史蒂夫'
 
-            //  key: 3,
-            // number: 3,
-            // alarmTime: '2022-01-03 01:32:01',
-            // alarmType:'',
-            // alarmPriority:'三级警情',
-            // alarmDescription:'收到徐教练咖啡',
-            // already:'已处理',
-            // alreadyUserName:'administator',
+            //接口文档数据结构
+            // id
+            // type
+            // title
+            // content
+            // userId
+            // username
+            // terminal
+            // createTime
+
+            //接口返回数据结构
+            // "content": "登录系统成功: 120.245.20.65",
+            //     "createTime": 1677568911000,
+            //     "id": 8,
+            //     "terminal": "WEB",
+            //     "title": "用户登录",
+            //     "type": 1,
+            //     "userId": 1
             const info = resTableData[i - 1];
             info.key = info.number = i;
-            if(!isNotEmpty(info.alreadyTime)){
-              info.already='未处理';
-            }
+            info.createTime=moment(new Date(info.createTime)).format('YYYY-MM-DD HH:mm:ss')
+            info.operation=info.title;
             this.tableData.push(info);
+
           }
+        }else{
+          this.$message.error(res.message)
         }
 
       }).catch(err => {
-        this.$message.error(err.code+'!  '+err.message)
+        this.$message.error(err.code + '!  ' + err.message)
+      })
+    },
+    getAllUser() {
+      request({
+        url: '/api/user/all'
+      }).then(res => {
+        if (res.code == 0) {
+          this.userList = [];
+          this.userList = res.data;
+        } else {
+          this.$message.error(res.message);
+        }
+      }).catch(err => {
+        this.$message.error(err.code + '!  ' + err.message)
+      })
+    },
+    getTerminalList() {
+      request({
+        url: '/api/log/terminal/list',
+      }).then(res => {
+        if (res.code == 0) {
+          this.terminalList = [];
+          this.terminalList = res.data;
+        } else {
+          this.$message.error(res.message);
+        }
+      }).catch(err => {
+        this.$message.error(err.code + '!  ' + err.message)
       })
     },
     onPaginationClicked(e) {
@@ -344,14 +386,10 @@ export default {
 
       this.endTime = null;
       this.endTimeString = '';
-
-      this.already = -1;
-      this.isAllActive = true;
-      this.isAlreadyActive = false;
-      this.isUntreatedActive = false;
       //置空两个select
-      this.alarmType='';
-      this.alarmPriority='';
+      this.user = {username: '', id: undefined};
+      this.terminal = {username:''};
+
     },
     onQueryBtnClicked() {
       if (!isNotEmpty(this.startDateString)) {
@@ -370,16 +408,16 @@ export default {
         this.$message.warn('结束时间不能为空！');
         return;
       }
-      const s=this.startDateString + ' ' + this.startTimeString;
-      const e=this.endDateString + ' ' + this.endTimeString;
-      if(s>e){
+      const s = this.startDateString + ' ' + this.startTimeString;
+      const e = this.endDateString + ' ' + this.endTimeString;
+      if (s > e) {
         this.cleanPicker();
         this.$message.warn("开始时间不能大于结束时间");
         return;
       }
       this.getTableData();
     },
-    cleanPicker(){
+    cleanPicker() {
       this.startDateString = '';
       this.startDate = null;
       this.startTimeString = '';
@@ -389,62 +427,21 @@ export default {
       this.endTimeString = '';
       this.endTime = null;
     },
-    changeBtnAcive(already) {
-      if (already == -1) {
-        this.isAllActive = true;
-        this.isAlreadyActive = this.isUntreatedActive = false;
-      } else if (already == 1) {
-        this.isAlreadyActive = true;
-        this.isAllActive = this.isUntreatedActive = false;
-      } else if (already == 0) {
-        this.isUntreatedActive = true;
-        this.isAllActive = this.isAlreadyActive = false;
-      }
-      this.already = already
+    onUserSelectChange(index, option) {
+      this.user = this.userList[index];
     },
-    onTroubleTypeSelectChange(index,option){
-      this.alarmType=this.alarmTypeList[index];
+    onTerminalSelectChange(index, option) {
+      this.terminal = this.terminalList[index]
     },
-    onAlarmPrioritySelectChange(index,option){
-      this.alarmPriority=this.alarmPriorityList[index];
-    },
-    getAlarmTypeList() {
-      request({
-        url:'/api/alarm/type'
-      }).then(res=>{
-        if(res.code==0){
-          this.alarmTypeList=[];
-          this.alarmTypeList=res.data;
-        }else{
-          this.$message.error(res.message)
-        }
-      }).catch(err=>{
-        this.$message.error(err.code + '!  ' + err.message)
-      })
-    },
-    getAlarmPriorityList(){
-      request({
-        url:'/api/alarm/priority'
-      }).then(res=>{
-        if(res.code==0){
-          this.alarmPriorityList=[];
-          this.alarmPriorityList=res.data;
-        }else{
-          this.$message.error(res.message)
-        }
-      }).catch(err=>{
-        this.$message.error(err.code + '!  ' + err.message)
-      })
-    }
   },
   created() {
     this.endDateString = moment(new Date()).format(this.dateFormat);
     this.startTimeString = this.endTimeString = moment(new Date()).format(this.timeFormat);
     this.startDateString = moment().subtract(23, 'hours').format(this.dateFormat);
     this.getTableData();
-    //两个select的数据
-    this.getAlarmTypeList();
-    this.getAlarmPriorityList();
+    //获取"用户"、"授权终端"两个select的数据
+    this.getAllUser();
+    this.getTerminalList();
   }
 }
 </script>
@@ -461,16 +458,6 @@ export default {
 
 .select {
   width: 200px;
-}
-
-.btn {
-  margin-right: 15px;
-  width: 70px;
-}
-
-.active {
-  background-color: #158BCD;
-  color: white;
 }
 
 </style>

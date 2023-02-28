@@ -135,7 +135,7 @@
             <a-col :span="7"></a-col>
             <a-col :span="3" class="left-txt">受电弓：</a-col>
             <a-col :span="2">
-              <div class="border">{{ saveDurationPantograph }}</div>
+              <a-input class="border" v-model="saveDurationPantograph"></a-input>
             </a-col>
             <a-col :span="3" class="right-txt">天</a-col>
             <a-col :span="9"></a-col>
@@ -144,7 +144,8 @@
             <a-col :span="7"></a-col>
             <a-col :span="3" class="left-txt">车厢：</a-col>
             <a-col :span="2">
-              <div class="border">{{ saveDurationCarriage }}</div>
+              <!--              <div class="border">{{ saveDurationCarriage }}</div>-->
+              <a-input class="border" v-model="saveDurationCarriage"></a-input>
             </a-col>
             <a-col :span="3" class="right-txt">天</a-col>
             <a-col :span="9"></a-col>
@@ -153,7 +154,8 @@
             <a-col :span="7"></a-col>
             <a-col :span="3" class="left-txt">板卡：</a-col>
             <a-col :span="2">
-              <div class="border">{{ saveDurationCard }}</div>
+              <!--              <div class="border">{{ saveDurationCard }}</div>-->
+              <a-input class="border" v-model="saveDurationCard"></a-input>
             </a-col>
             <a-col :span="3" class="right-txt">天</a-col>
             <a-col :span="9"></a-col>
@@ -161,21 +163,9 @@
         </div>
       </div>
       <template #footer>
-        <a-button @click="onStorageConfigResetBtnClicked('未找到相关update接口')">重置</a-button>
+        <a-button @click="onStorageConfigResetBtnClicked">重置</a-button>
         <a-button @click="storageConfigModalVisible=false">取消</a-button>
         <a-button @click="onStorageConfigConfirmBtnClicked">确定</a-button>
-      </template>
-    </a-modal>
-    <!--内容未确定-->
-    <a-modal
-        title="摄像头信息"
-        centered
-        :width="800"
-        :visible="false"
-        :closable="false"
-    >
-      <template #footer>
-        <a-button @click="modal1Visible=false">确定</a-button>
       </template>
     </a-modal>
     <!--文件导出modal-->
@@ -245,12 +235,12 @@
               <a-col>
                 <a-radio :value="1">摄像头</a-radio>
                 <a-select
-                    :value="supervise.name"
+                    :value="device.name"
                     class="select"
-                    @change="onSuperviseSelectChange">
+                    @change="onDeviceSelectChange">
                   <!--:key只能绑定string，number.不能绑定对象  :value可以绑定对象-->
                   <a-select-option
-                      v-for="(item,index) of superviseList"
+                      v-for="(item,index) of deviceList"
                       :key="index"
                   >
                     {{ item.name }}
@@ -258,12 +248,12 @@
                 </a-select>
                 <a-radio :value="2" style="margin-left: 10px">监视物</a-radio>
                 <a-select
-                    :value="device.name"
+                    :value="supervise.name"
                     class="select"
-                    @change="onDeviceSelectChange">
+                    @change="onSuperviseSelectChange">
                   <!--:key只能绑定string，number.不能绑定对象  :value可以绑定对象-->
                   <a-select-option
-                      v-for="(item,index) of deviceList"
+                      v-for="(item,index) of superviseList"
                       :key="index"
                   >
                     {{ item.name }}
@@ -455,7 +445,11 @@ export default {
     }
   },
   methods: {
-    getTableData() {
+    /**
+     *
+     * @param query 点击"查询"按钮->置为true->先清空tableData
+     */
+    getTableData(query) {
       const params = {};
       //必传参数
       params.page = this.pagination.current;
@@ -472,12 +466,13 @@ export default {
       }
       request({
         url: '/api/storage/disk/list',
-        method:'get',
+        method: 'get',
         params,
       }).then(res => {
         if (res.code == 0) {
           try {
             this.diskNoList = [];
+            this.tableData = [];
             // "diskNo": "",
             // "type": 0,
             // "status": 0,
@@ -510,7 +505,7 @@ export default {
                 this.tableData.push(info)
                 if (res.data[i].diskNo) this.diskNoList.push(res.data[i].diskNo);
               }
-            } else if(res.data.constructor === Object){
+            } else if (res.data.constructor === Object) {
               let info = res.data;
               info.key = info.number = 1;
               if (info.type && info.type == 0) {
@@ -529,7 +524,7 @@ export default {
           }
         }
       }).catch(err => {
-        this.$message.error(err)
+        this.$message.error(err.code+'!  '+err.message)
       })
     },
     resetBtnClicked() {
@@ -557,39 +552,36 @@ export default {
         method: 'get',
       }).then(res => {
         if (res.code == 0) {
-          if (res.data.saveInterval) this.saveInterval = res.data.saveInterval;
-          if (res.data.saveDirectory) this.saveDirectory = res.data.saveDirectory;
+          if (res.data.saveInterval) {
+            this.saveInterval = res.data.saveInterval;
+            this.saveIntervalList = [];
+            this.saveIntervalList.push(this.data.saveInterval);
+          }
+          if (res.data.saveDirectory) {
+            this.saveDirectory = res.data.saveDirectory;
+            this.saveDirectoryList = [];
+            this.saveDirectoryList.push(res.data.saveDirectory)
+          }
           if (res.data.saveDurationPantograph) this.saveDurationPantograph = res.data.saveDurationPantograph;
           if (res.data.saveDurationCarriage) this.saveDurationCarriage = res.data.saveDurationCarriage;
           if (res.data.saveDurationCard) this.saveDurationCard = res.data.saveDurationCard;
         }
       }).catch(err => {
-        this.$message.error(err)
+        this.$message.error(err.code+'!  '+err.message)
       })
     },
-
-
-    onStorageConfigResetBtnClicked(msg) {
+    onStorageConfigResetBtnClicked() {
       request({
-        url:'/api/storage/config/reset',
-        method:'put'
-      }).then(res=>{
-        if(res.code==0){
+        url: '/api/storage/config/reset',
+        method: 'put'
+      }).then(res => {
+        if (res.code == 0) {
           this.$message.info(res.message)
         }
-      }).catch(err=>{
-        this.$message.error(err)
+      }).catch(err => {
+        this.$message.error(err.code+'!  '+err.message)
       })
     },
-
-    onDownloadRecordImgClicked() {
-      this.downloadRecordModalVisible = true;
-
-      this.getSuperviseList();
-      this.getDeviceList();
-    },
-
-
     onStorageConfigConfirmBtnClicked() {
       const params = {
         storageConfig: {
@@ -609,8 +601,14 @@ export default {
           this.storageConfigModalVisible = false;
         }
       }).catch(err => {
-        this.$message.warn('网络请求错误')
+        this.$message.error(err.code+'!  '+err.message)
       })
+    },
+    onDownloadRecordImgClicked() {
+      this.downloadRecordModalVisible = true;
+
+      this.getSuperviseList();
+      this.getDeviceList();
     },
     /**
      *
@@ -648,10 +646,6 @@ export default {
       // console.log(e)
       this.pagination = e
     },
-    onRadioChange(e) {
-      console.log('radio checked', e.target.value);
-    },
-
     showMessage(msg) {
       this.$message.info(msg)
     },
@@ -680,27 +674,18 @@ export default {
       } else if (e.target.value == 1) {//摄像头
         this.deviceId = this.device.deviceId;
       } else if (e.target.value == 2) {//监视物
-        this.deviceId = this.supervise.type;
+        this.deviceId = this.supervise.id;
       }
     },
     onDownloadRecordResetBtnClicked() {
-      //todo
       this.reset();
     },
     onDownloadRecordCancelBtnClicked() {
       this.downloadRecordModalVisible = false;
-
       this.reset();
     },
     reset() {
-      this.startDateString = '';
-      this.startDate = null;
-      this.startTimeString = '';
-      this.startTime = null;
-      this.endDateString = '';
-      this.endDate = null;
-      this.endTimeString = '';
-      this.endTime = null;
+      this.cleanPicker();
 
       this.deviceType = 0;
       this.deviceId = undefined;
@@ -710,6 +695,16 @@ export default {
 
       this.deviceList = [];
       this.device = {name: '', deviceId: undefined};
+    },
+    cleanPicker(){
+      this.startDateString = '';
+      this.startDate = null;
+      this.startTimeString = '';
+      this.startTime = null;
+      this.endDateString = '';
+      this.endDate = null;
+      this.endTimeString = '';
+      this.endTime = null;
     },
     onDownloadRecordBtnClicked() {
       if (!isNotEmpty(this.startDateString)) {
@@ -727,10 +722,14 @@ export default {
       if (!isNotEmpty(this.endTimeString)) {
         this.$message.warn('结束时间不能为空！');
         return;
-        this.downloadRecord();
       }
-    },
-    downloadRecord() {
+      const s=this.startDateString + ' ' + this.startTimeString;
+      const e=this.endTimeString + ' ' + this.endTimeString;
+      if(s>e){
+        this.cleanPicker();
+        this.$message.warn("开始时间不能大于结束时间");
+        return;
+      }
       const params = {};
       params.startTime = this.startDateString + ' ' + this.startTimeString;
       params.endTime = this.endTimeString + ' ' + this.endTimeString;
@@ -745,17 +744,21 @@ export default {
           const downloadUrl = res.data;
           request({
             url: downloadUrl
-          }).then(res => {
-            if (res.code == 0) {
+          }).then(resp => {
+            if (resp.code == 0) {
               this.$message.info('下载成功')
+            }else {
+              this.$message.error(resp.message)
             }
           }).catch(err => {
+            this.$message.error(err.code+'!  '+err.message)
           })
+        }else{
+          this.$message.error(res.message)
         }
       }).catch(err => {
-        this.$message.warn('网络请求失败')
+        this.$message.error(err.code+'!  '+err.message)
       })
-
     },
 
     onDiskNoSelectChange(index, option) {
@@ -785,7 +788,7 @@ export default {
           this.$message.info('初始化成功')
         }
       }).catch(err => {
-        this.$message.info('初始化失败')
+        this.$message.error(err.code+'!  '+err.message)
       })
     },
     //  /api/supervise/list
@@ -795,11 +798,17 @@ export default {
         method: 'get',
       }).then(res => {
         if (res.code == 0) {
-          this.superviseList = [];
-          this.superviseList.push(res.data);
+          this.superviseList=[];
+          if(res.data.constructor===Array){
+            this.superviseList=res.data;
+          }else if(res.data.constructor===Object){
+            this.superviseList.push(res.data)
+          }
+        }else{
+          this.$message.error(res.message);
         }
       }).catch(err => {
-        this.$message.warn('网络请求失败！')
+        this.$message.error(err.code+'!  '+err.message)
       })
     },
     // /api/device/query/devices
@@ -808,16 +817,18 @@ export default {
         url: '/api/device/query/devices',
         method: 'get',
         params: {
-          page: 1,
+          page: 0,//从0 开始，若1开始后端报错
           count: 200,
         }
       }).then(res => {
         if (res.code == 0) {
           this.deviceList = [];
           this.deviceList = res.data.list;
+        }else{
+          this.$message.error(res.message);
         }
       }).catch(err => {
-        this.$message.warn('网络请求失败！')
+        this.$message.error(err.code+'!  '+err.message)
       })
     },
     test() {

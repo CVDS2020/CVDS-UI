@@ -287,8 +287,7 @@ export default {
           this.$message.warn('数据请求失败');
         }
       }).catch(err => {
-        // console.log(err);
-        this.$message.warn('数据请求失败')
+        this.$message.error(err.code+'!  '+err.message)
       })
     },
     getLastAlarm() {
@@ -328,6 +327,7 @@ export default {
           }
         }
       }).catch(err => {
+        this.$message.error(err.code+'!  '+err.message)
       })
     },
   },

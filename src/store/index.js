@@ -28,8 +28,8 @@ const store = new Vuex.Store({
             state.user.username = resData.username;
             state.user.roleName = resData.role.name;
             state.user.loginTime = resData.loginTime;
-            state.user.loginDev = '';
-            state.user.ip = resData.role.ip;
+            state.user.loginDev = resData.terminal;
+            state.user.ip = resData.ip;
             state.user.terminal=resData.terminal;
         },
         setLoginModalVisible(state,visible){

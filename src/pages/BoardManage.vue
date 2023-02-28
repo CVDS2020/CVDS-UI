@@ -8,10 +8,10 @@
           <h2 class="p">{{ this.power.name }}</h2>
           <div class="btn-container">
             <a-button class="btn" :disabled="Boolean(this.power.status)" :style="getOnBtnStyle(this.power.status)"
-                      @click="onCtrlBtnClicked(power.type,0)">开机
+                      @click="onCtrlBtnClicked(power.type,1)">开机
             </a-button>
             <a-button class="btn" :disabled="!Boolean(this.power.status)" :style="getOffBtnStyle(this.power.status)"
-                      @click="onCtrlBtnClicked(power.type,1)">关机
+                      @click="onCtrlBtnClicked(power.type,0)">关机
             </a-button>
             <a-button class="btn" :disabled="!Boolean(this.power.status)" :style="getRestartBtnStyle(this.power.status)"
                       @click="onCtrlBtnClicked(power.type,2)">重启
@@ -24,14 +24,13 @@
           <h2 class="p">{{ this.switchBoard.name }}</h2>
           <div class="btn-container">
             <a-button class="btn" :disabled="Boolean(this.switchBoard.status)"
-                      :style="getOnBtnStyle(this.switchBoard.status)" @click="onCtrlBtnClicked(switchBoard.type,0)">开机
+                      :style="getOnBtnStyle(this.switchBoard.status)" @click="onCtrlBtnClicked(switchBoard.type,1)">开机
             </a-button>
             <a-button class="btn" :disabled="!Boolean(this.switchBoard.status)"
-                      :style="getOffBtnStyle(this.switchBoard.status)" @click="onCtrlBtnClicked(switchBoard.type,1)">关机
+                      :style="getOffBtnStyle(this.switchBoard.status)" @click="onCtrlBtnClicked(switchBoard.type,0)">关机
             </a-button>
             <a-button class="btn" :disabled="!Boolean(this.switchBoard.status)"
-                      :style="getRestartBtnStyle(this.switchBoard.status)"
-                      @click="onCtrlBtnClicked(switchBoard.type,2)">重启
+                      :style="getRestartBtnStyle(this.switchBoard.status)" @click="onCtrlBtnClicked(switchBoard.type,2)">重启
             </a-button>
           </div>
         </a-card>
@@ -41,10 +40,10 @@
           <h2 class="p">{{ this.videoCore.name }}</h2>
           <div class="btn-container">
             <a-button class="btn" :disabled="Boolean(this.videoCore.status)"
-                      :style="getOnBtnStyle(this.videoCore.status)" @click="onCtrlBtnClicked(videoCore.type,0)">开机
+                      :style="getOnBtnStyle(this.videoCore.status)" @click="onCtrlBtnClicked(videoCore.type,1)">开机
             </a-button>
             <a-button class="btn" :disabled="!Boolean(this.videoCore.status)"
-                      :style="getOffBtnStyle(this.videoCore.status)" @click="onCtrlBtnClicked(videoCore.type,1)">关机
+                      :style="getOffBtnStyle(this.videoCore.status)" @click="onCtrlBtnClicked(videoCore.type,0)">关机
             </a-button>
             <a-button class="btn" :disabled="!Boolean(this.videoCore.status)"
                       :style="getRestartBtnStyle(this.videoCore.status)" @click="onCtrlBtnClicked(videoCore.type,2)">重启
@@ -57,10 +56,10 @@
           <h2 class="p">{{ this.AIAnlyze.name }}</h2>
           <div class="btn-container">
             <a-button class="btn" :disabled="Boolean(AIAnlyze.status)" :style="getOnBtnStyle(this.AIAnlyze.status)"
-                      @click="onCtrlBtnClicked(AIAnlyze.type,0)">开机
+                      @click="onCtrlBtnClicked(AIAnlyze.type,1)">开机
             </a-button>
             <a-button class="btn" :disabled="!Boolean(AIAnlyze.status)" :style="getOffBtnStyle(this.AIAnlyze.status)"
-                      @click="onCtrlBtnClicked(AIAnlyze.type,1)">关机
+                      @click="onCtrlBtnClicked(AIAnlyze.type,0)">关机
             </a-button>
             <a-button class="btn" :disabled="!Boolean(AIAnlyze.status)"
                       :style="getRestartBtnStyle(this.AIAnlyze.status)" @click="onCtrlBtnClicked(AIAnlyze.type,2)">重启
@@ -124,7 +123,7 @@ export default {
         type: 4,
         name: 'AI分析板',
         status: 1,
-      }
+      },
     }
   },
   methods: {
@@ -158,6 +157,7 @@ export default {
         }
 
       }).catch(err => {
+        this.$message.error(err.code+'!  '+err.message)
       })
     },
 
@@ -190,12 +190,11 @@ export default {
         return {backgroundColor: this.btnGreen}
       }
     },
-    onCtrlBtnClicked(type, ctrl) {
-      console.log('onclicked:' + type + "  " + ctrl);
-      //todo 验证、确定put添加参数方式
+    onCtrlBtnClicked(type, action) {
       let params={};
-      params.ctrl=ctrl;
-      reuqest({
+      params.type=type;
+      params.action=action;
+      request({
         url: '/api/system/board/ctrl',
         method: 'put',
         data:JSON.parse(JSON.stringify(params)),
@@ -204,7 +203,7 @@ export default {
           this.getBoardList();
         }
       }).catch(err => {
-
+        this.$message.error(err.code+'!  '+err.message)
       })
     },
   },

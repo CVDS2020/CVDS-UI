@@ -42,47 +42,14 @@
         <a-col :span="2"></a-col>
       </a-row>
       <a-row style="margin-top: 15px">
-        <a-col :span="2"></a-col>
-        <a-col :span="2" class="center-txt" style="text-align: right">用户：</a-col>
-        <a-col :span="4">
-          <a-select
-              :value="user.username"
-              class="select"
-              @change="onUserSelectChange">
-            <!--:key只能绑定string，number.不能绑定对象  :value可以绑定对象-->
-            <a-select-option
-                v-for="(item,index) of userList"
-                :key="index"
-            >
-              {{ item.username }}
-            </a-select-option>
-          </a-select>
-        </a-col>
-        <a-col :span="3"></a-col>
-        <a-col :span="2" class="center-txt" style="text-align: right">授权终端：</a-col>
-        <a-col :span="4">
-          <a-select
-              :value="terminal.name"
-              class="select"
-              @change="onTerminalSelectChange">
-            <!--:key只能绑定string，number.不能绑定对象  :value可以绑定对象-->
-            <a-select-option
-                v-for="(item,index) of terminalList"
-                :key="index"
-            >
-              {{ item.name }}
-            </a-select-option>
-          </a-select>
-        </a-col>
-
-        <a-col :span="4"></a-col>
+        <a-col :span="21"></a-col>
         <a-col :span="1">
           <a-button @click="onQueryBtnClicked">查询</a-button>
         </a-col>
         <a-col :span="2"></a-col>
       </a-row>
     </div>
-    <div style="margin: 20px 0 10px 0">信息列表[共{{ tableData.length }}条]</div>
+    <div style="margin: 20px 0 10px 0">信息列表[共{{tableData.length}}条]</div>
     <a-table
         bordered
         :columns="columns"
@@ -98,7 +65,6 @@ import 'moment/locale/zh-cn';
 import locale from 'ant-design-vue/es/date-picker/locale/zh_CN';
 import moment from 'moment';
 import {request} from "@/network/request";
-
 function isNotEmpty(param) {
   return param && param != ''
 }
@@ -120,21 +86,15 @@ const columns = [
     align: 'center'
   },
   {
-    title: '用户',
-    dataIndex: 'username',
-    key: 'username',
+    title: '类型',
+    dataIndex: 'typeStr',
+    key: 'typeStr',
     align: 'center'
   },
   {
-    title: '授权终端',
-    dataIndex: 'terminal',
-    key: 'terminal',
-    align: 'center'
-  },
-  {
-    title: '操作',
-    dataIndex: 'operation',
-    key: 'operation',
+    title: '事件',
+    dataIndex: 'title',
+    key: 'title',
     align: 'center'
   },
   {
@@ -149,36 +109,107 @@ const tableData = [
     key: 1,
     number: 1,
     createTime: '2022-01-01 01:01:01',
-    username: 'admin',
-    terminal: 'sdfadsffgdfgsdfg',
-    operation: '登陆',
-    content: '详细内容阿水淀粉速度史蒂夫'
+    typeStr: '',
+    title: 'dfasdsdf',
+    content: '耐烧豆腐哈水淀粉史蒂夫阿水淀粉阿水',
   },
   {
     key: 2,
     number: 2,
-    createTime: '2022-01-06 01:01:01',
-    username: 'admin',
-    terminal: 'sdfadsffgdfgsdfg',
-    operation: '登陆',
-    content: '详细内容阿水淀粉速度史蒂夫'
+    createTime: '2022-01-02 01:01:01',
+    typeStr: '',
+    title: 'dfasdsdf',
+    content: '耐烧豆腐哈水淀粉史蒂夫阿水淀粉阿水',
   },
   {
     key: 3,
     number: 3,
+    createTime: '2022-01-03 01:01:03',
+    typeStr: '',
+    title: 'dfasdsdf',
+    content: '耐烧豆腐哈水淀粉史蒂夫阿水淀粉阿水',
+  },
+  {
+    key: 4,
+    number: 4,
+    createTime: '2022-01-04 01:01:01',
+    typeStr: '',
+    title: 'dfasdsdf',
+    content: '耐烧豆腐哈水淀粉史蒂夫阿水淀粉阿水',
+  },
+  {
+    key: 5,
+    number: 5,
     createTime: '2022-01-05 01:01:01',
-    username: 'admin',
-    terminal: 'sdfadsffgdfgsdfg',
-    operation: '登陆定时发送到发送到发送地方',
-    content: '详细内容阿水淀粉速度史蒂夫'
-  }]
+    typeStr: '',
+    title: 'dfasdsdf',
+    content: '耐烧豆腐哈水淀粉史蒂夫阿水淀粉阿水',
+  },
+  {
+    key: 6,
+    number: 6,
+    createTime: '2022-01-06 01:01:03',
+    typeStr: '',
+    title: 'dfasdsdf',
+    content: '耐烧豆腐哈水淀粉史蒂夫阿水淀粉阿水',
+  },
+
+  {
+    key: 7,
+    number: 7,
+    createTime: '2022-01-01 01:01:01',
+    typeStr: '',
+    title: 'dfasdsdf',
+    content: '耐烧豆腐哈水淀粉史蒂夫阿水淀粉阿水',
+  },
+  {
+    key: 8,
+    number: 8,
+    createTime: '2022-01-02 01:01:01',
+    typeStr: '',
+    title: 'dfasdsdf',
+    content: '耐烧豆腐哈水淀粉史蒂夫阿水淀粉阿水',
+  },
+  {
+    key: 9,
+    number: 9,
+    createTime: '2022-01-03 01:01:03',
+    typeStr: '',
+    title: 'dfasdsdf',
+    content: '耐烧豆腐哈水淀粉史蒂夫阿水淀粉阿水',
+  },
+  {
+    key: 10,
+    number: 10,
+    createTime: '2022-01-04 01:01:01',
+    typeStr: '',
+    title: 'dfasdsdf',
+    content: '耐烧豆腐哈水淀粉史蒂夫阿水淀粉阿水',
+  },
+  {
+    key: 11,
+    number: 11,
+    createTime: '2022-01-05 01:01:01',
+    typeStr: '',
+    title: 'dfasdsdf',
+    content: '耐烧豆腐哈水淀粉史蒂夫阿水淀粉阿水',
+  },
+  {
+    key: 12,
+    number: 12,
+    createTime: '2022-01-06 01:01:03',
+    typeStr: '',
+    title: 'dfasdsdf',
+    content: '耐烧豆腐哈水淀粉史蒂夫阿水淀粉阿水',
+  },
+]
 export default {
-  name: "OperationLog",
+  name: "SysLog",
   data() {
     return {
       columns,
       tableData,
-      allowClear: false,
+      allowClear:false,
       dateFormat: 'YYYY-MM-DD',
       timeFormat: 'HH:mm:ss',
       startDateString: '',
@@ -189,12 +220,6 @@ export default {
       endDate: null,
       endTimeString: '',
       endTime: null,
-
-      user: {username: '', userId: undefined},
-      userList: [],
-
-      terminal: {},
-      terminalList: [],
 
       count: 200,
       // 分页参数
@@ -212,7 +237,8 @@ export default {
       },
     };
   },
-  computed: {},
+  computed: {
+  },
   methods: {
     moment,
     onStartDateChange(date, dateString) {
@@ -237,51 +263,39 @@ export default {
         url: '/api/log/list',
         params: {
           page: this.pagination.current,
-          count: this.pagination.pageSize,
-          startTime: this.startDateString + ' ' + this.startTimeString,
-          endTime: this.endTimeString + ' ' + this.endTimeString,
-          type: 1,//0系统日志  1操作日志
+          count: this.count,
+          startTime: this.startDateString+' '+this.startTimeString,
+          endTime:this.endDateString+' '+this.endTimeString,
+          type: 0,//0系统日志  1操作日志
         }
       }).then(res => {
-        if (res.code == 0) {
-
+        if(res.code==0){
           const resData = res.data;
           const resTableData = resData.list;
           const len = resTableData.length;
-
-          let userMap=new Map();//user select数据源去重
-          let terminalMap=new Map();//terminal数据源去重
-
+          if(res.data.isFirstPage){
+            this.tableData=[];
+          }
           for (let i = 1; i <= len; i++) {
-            // key: 1,
-            // number: 1,
-            // createTime: '2022-01-01 01:01:01',
-            // username: 'admin',
-            // terminal: 'sdfadsffgdfgsdfg',
-            // operation: '登陆',
-            // content:'详细内容阿水淀粉速度史蒂夫'
+            //     key: 12,
+            //     number: 12,
+            //     createTime: '2022-01-06 01:01:03',
+            //     typeStr: '',
+            //     title: 'dfasdsdf',
+            //     content: '耐烧豆腐哈水淀粉史蒂夫阿水淀粉阿水',
             const info = resTableData[i - 1];
-            info.key = info.number = i;
-
+            info.key=info.number=i;
+            info.typeStr='';
             this.tableData.push(info);
-            userMap.set(info.userId,info.username);
-            //todo terminalMap
           }
-
-          this.userList=[];
-          this.terminalList=[];
-          for(let [key,value] of userMap.entries()){
-            let obj={username:key,userId:value}
-            this.userList.push(obj);
-          }
-          //todo 等待回复后设置授权终端相关数据
-          // this.terminalList=terminalMap;
+        }else {
+          this.$message.error(res.message);
         }
 
-      }).catch(err => {
-      })
+      }).catch(err => { this.$message.error(err.code+'!  '+err.message)})
     },
     onPaginationClicked(e) {
+      // console.log(e)
       this.pagination = e
     },
     onResetBtnClicked() {
@@ -296,42 +310,49 @@ export default {
 
       this.endTime = null;
       this.endTimeString = '';
-      //todo 置空两个select
-      this.user={username: '', userId: undefined};
-      this.terminal={};
-
     },
     onQueryBtnClicked() {
-      if (!isNotEmpty(this.startDateString)) {
+      if(!isNotEmpty(this.startDateString)){
         this.$message.warn('开始日期不能为空！');
         return;
       }
-      if (!isNotEmpty(this.startTimeString)) {
+      if(!isNotEmpty(this.startTimeString)){
         this.$message.warn('开始时间不能为空！');
         return;
       }
-      if (!isNotEmpty(this.endDateString)) {
+      if(!isNotEmpty(this.endDateString)){
         this.$message.warn('结束日期不能为空！');
         return;
       }
-      if (!isNotEmpty(this.endTimeString)) {
+      if(!isNotEmpty(this.endTimeString)){
         this.$message.warn('结束时间不能为空！');
+        return;
+      }
+      const s=this.startDateString + ' ' + this.startTimeString;
+      const e=this.endDateString + ' ' + this.endTimeString;
+      if(s>e){
+        this.cleanPicker();
+        this.$message.warn("开始时间不能大于结束时间");
         return;
       }
       this.getTableData();
     },
-    onUserSelectChange(index, option) {
-      this.user = this.userList[index];
-    },
-    onTerminalSelectChange(index, option) {
-      //todo
+    cleanPicker(){
+      this.startDateString = '';
+      this.startDate = null;
+      this.startTimeString = '';
+      this.startTime = null;
+      this.endDateString = '';
+      this.endDate = null;
+      this.endTimeString = '';
+      this.endTime = null;
     },
   },
   created() {
-    //获取"用户"、"授权终端"两个select的数据
-    this.endDateString = moment(new Date()).format(this.dateFormat);
-    this.startTimeString = this.endTimeString = moment(new Date()).format(this.timeFormat);
-    this.startDateString = moment().subtract(23, 'hours').format(this.dateFormat);
+    this.endDateString=moment(new Date()).format(this.dateFormat);
+    this.startTimeString= this.endTimeString=moment(new Date()).format(this.timeFormat);
+    this.startDateString=moment().subtract(23,'hours').format(this.dateFormat);
+
     this.getTableData()
   }
 }
@@ -345,10 +366,6 @@ export default {
 
 .center-txt {
   margin-top: 6px;
-}
-
-.select {
-  width: 200px;
 }
 
 </style>

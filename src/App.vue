@@ -45,8 +45,8 @@ export default {
     return {
       flag: 0,
       locale: zhCN,
-      // modalVisible: this.$store.state.loginVisible,
-      modalVisible: false,
+      modalVisible: this.$store.state.loginVisible,
+      // modalVisible: false,
       userName: 'admin',
       pwd: 'admin',
     };
@@ -67,10 +67,11 @@ export default {
           this.modalVisible=this.$store.state.loginVisible;
           this.$store.commit('setUserInfo', res.data);
           this.$router.replace('/dashboard');
+        }else{
+          this.$message.error(res.message)
         }
       }).catch(err => {
-        // console.log(err);
-        this.$message.error('登陆失败')
+        this.$message.error(err.code+'!  '+err.message)
       })
     },
   },
