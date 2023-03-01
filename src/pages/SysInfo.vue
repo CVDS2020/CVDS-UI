@@ -8,7 +8,6 @@
           <a-col :span="2"></a-col>
           <a-col :span="4" class="col"><span class="txt">类型代码：</span>
             <span class="span">{{ typeCode }}</span>
-            <!--            <a-input class="input"></a-input>-->
           </a-col>
           <a-col :span="4" class="col"><span class="txt">厂商代码：</span>
             <span class="span">{{ manufacturerCode }}</span>
@@ -129,14 +128,15 @@
             </div>
           </a-col>
         </a-row>
-        <a-row class="row margin-bottom" style="">
-          <a-col :span="2"></a-col>
-          <a-col :span="16" class="col">
-            <span class="txt">下载路径：</span>
-            <a-input class="input" style="width: 400px"></a-input>
-            <a-button style="margin-left: 5px" @click="onBrowseBtnclicked">浏览</a-button>
-          </a-col>
-        </a-row>
+        <!--应用无法更改下载路径，只能在浏览器设置-->
+<!--        <a-row class="row margin-bottom" style="">-->
+<!--          <a-col :span="2"></a-col>-->
+<!--          <a-col :span="16" class="col">-->
+<!--            <span class="txt">下载路径：</span>-->
+<!--            <a-input class="input" style="width: 400px"></a-input>-->
+<!--            <a-button style="margin-left: 5px" @click="onBrowseBtnclicked">浏览</a-button>-->
+<!--          </a-col>-->
+<!--        </a-row>-->
       </div>
     </div>
   </div>
@@ -302,7 +302,7 @@ export default {
       }
       const s = this.startDateString + ' ' + this.startTimeString;
       const e = this.endDateString + ' ' + this.endTimeString;
-      if (s > e) {
+      if (s < e) {
         this.cleanPicker();
         this.$message.warn("开始时间不能大于结束时间");
         return;

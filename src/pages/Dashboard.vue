@@ -6,7 +6,7 @@
         <a-progress class="progress" width="300px" type="circle" :percent="100">
           <template #format="percent">
             <div style="flex-direction: column">
-              <div class="progress-center-txt">{{ (cameraOnlineNum / cardNum) * 100 }}%</div>
+              <div class="progress-center-txt">{{ cardNum == 0 ? 0 : (cardOnlineNum / cardNum) * 100 }}%</div>
               <div class="progress-center-txt" style="margin-top: 5px">在线</div>
             </div>
           </template>
@@ -20,7 +20,7 @@
         <a-progress class="progress" width="300px" type="circle" :percent="100">
           <template #format="percent">
             <div style="flex-direction: column">
-              <div class="progress-center-txt">{{ (cameraOnlineNum / cameraNum) * 100 }}%</div>
+              <div class="progress-center-txt">{{ cameraNum == 0 ? 0 : (cameraOnlineNum / cameraNum) * 100 }}%</div>
               <div class="progress-center-txt" style="margin-top: 5px">在线</div>
             </div>
           </template>
@@ -29,11 +29,13 @@
         <div class="progress-footer-txt">总数：{{ cameraNum }}</div>
       </a-card>
       <a-card class="card">
-        <div class="progress-title-txt">板卡在线数量</div>
+        <div class="progress-title-txt">本地存储空间</div>
         <a-progress class="progress" width="300px" type="circle" :percent="100">
           <template #format="percent">
             <div style="flex-direction: column">
-              <div class="progress-center-txt">{{ (storageFreeCapacity / storageCapacity) * 100 }}%</div>
+              <div class="progress-center-txt">
+                {{ storageCapacity == 0 ? 0 : (storageFreeCapacity / storageCapacity) * 100 }}%
+              </div>
               <div class="progress-center-txt" style="margin-top: 5px">可用</div>
             </div>
           </template>
@@ -57,7 +59,7 @@
         :pagination="pagination"
         size="small"
         :scroll="{y: 300 }">
-    <!--        :pagination="false"-->
+      <!--        :pagination="false"-->
       <template #alarmPriority="value,record,index">
         <div>
           <img v-if="value==='三级'" class="img" src="../assets/img/icon-alarm-blue.png" alt="">
@@ -69,7 +71,7 @@
       <template #alreadyTime="value,record,index">
         <div>
           <span v-if="value===''" style="color: red">未处理</span>
-          <span v-else>{{value}}</span></div>
+          <span v-else>{{ value }}</span></div>
       </template>
     </a-table>
   </div>
@@ -78,7 +80,7 @@
 <script>
 import {request} from "@/network/request";
 
-//table 表头及表格数据
+const tableData=[];
 const columns = [
   {
     title: '编号',
@@ -120,118 +122,119 @@ const columns = [
     scopedSlots: {customRender: 'alreadyTime'}
   },
 ];
-const tableData = [
-  {
-    key: 1,
-    number: 1,
-    alarmTime: '2022/10/22 10:12:36',
-    alarmType: '故障类别',
-    alarmPriority: '三级',
-    alarmDescription: '摄像头05已关闭，请检查',
-    alreadyTime: '',
-  },
-  {
-    key: 2,
-    number: 2,
-    alarmTime: '2022/10/22 10:12:36',
-    alarmType: '故障类别',
-    alarmPriority: '一级',
-    alarmDescription: '摄像头03已关闭，请检查',
-    alreadyTime: '已处理',
-  },
-  {
-    key: 3,
-    number: 3,
-    alarmTime: '2022/10/22 10:12:36',
-    alarmType: '故障类别',
-    alarmPriority: '二级',
-    alarmDescription: '摄像头01被部分遮挡，请检查',
-    alreadyTime: '',
-  },
-  {
-    key: 4,
-    number: 4,
-    alarmTime: '2022/10/22 10:12:36',
-    alarmType: '故障类别',
-    alarmPriority: '二级',
-    alarmDescription: '摄像头02故障，请检查',
-    alreadyTime: '未处理',
-  },
-  {
-    key: 5,
-    number: 5,
-    alarmTime: '2022/10/22 10:12:36',
-    alarmType: '故障类别',
-    alarmPriority: '一级',
-    alarmDescription: '存储空间不足，自动停止保存视频',
-    alreadyTime: '未处理',
-  },
-  {
-    key: 6,
-    number: 6,
-    alarmTime: '2022/10/22 10:12:36',
-    alarmType: '故障类别',
-    alarmPriority: '一级',
-    alarmDescription: '04摄像头，受电弓故障，请确认并联系人员检修',
-    alreadyTime: '未处理',
-  },
+// const tableData = [
+//   {
+//     key: 1,
+//     number: 1,
+//     alarmTime: '2022/10/22 10:12:36',
+//     alarmType: '故障类别',
+//     alarmPriority: '三级',
+//     alarmDescription: '摄像头05已关闭，请检查',
+//     alreadyTime: '',
+//   },
+//   {
+//     key: 2,
+//     number: 2,
+//     alarmTime: '2022/10/22 10:12:36',
+//     alarmType: '故障类别',
+//     alarmPriority: '一级',
+//     alarmDescription: '摄像头03已关闭，请检查',
+//     alreadyTime: '已处理',
+//   },
+//   {
+//     key: 3,
+//     number: 3,
+//     alarmTime: '2022/10/22 10:12:36',
+//     alarmType: '故障类别',
+//     alarmPriority: '二级',
+//     alarmDescription: '摄像头01被部分遮挡，请检查',
+//     alreadyTime: '',
+//   },
+//   {
+//     key: 4,
+//     number: 4,
+//     alarmTime: '2022/10/22 10:12:36',
+//     alarmType: '故障类别',
+//     alarmPriority: '二级',
+//     alarmDescription: '摄像头02故障，请检查',
+//     alreadyTime: '未处理',
+//   },
+//   {
+//     key: 5,
+//     number: 5,
+//     alarmTime: '2022/10/22 10:12:36',
+//     alarmType: '故障类别',
+//     alarmPriority: '一级',
+//     alarmDescription: '存储空间不足，自动停止保存视频',
+//     alreadyTime: '未处理',
+//   },
+//   {
+//     key: 6,
+//     number: 6,
+//     alarmTime: '2022/10/22 10:12:36',
+//     alarmType: '故障类别',
+//     alarmPriority: '一级',
+//     alarmDescription: '04摄像头，受电弓故障，请确认并联系人员检修',
+//     alreadyTime: '未处理',
+//   },
+//
+//
+//   {
+//     key: 7,
+//     number: 7,
+//     alarmTime: '2022/10/22 10:12:36',
+//     alarmType: '故障类别',
+//     alarmPriority: '三级',
+//     alarmDescription: '摄像头05已关闭，请检查',
+//     alreadyTime: '',
+//   },
+//   {
+//     key: 8,
+//     number: 8,
+//     alarmTime: '2022/10/22 10:12:36',
+//     alarmType: '故障类别',
+//     alarmPriority: '一级',
+//     alarmDescription: '摄像头03已关闭，请检查',
+//     alreadyTime: '已处理',
+//   },
+//   {
+//     key: 9,
+//     number: 9,
+//     alarmTime: '2022/10/22 10:12:36',
+//     alarmType: '故障类别',
+//     alarmPriority: '二级',
+//     alarmDescription: '摄像头01被部分遮挡，请检查',
+//     alreadyTime: '',
+//   },
+//   {
+//     key: 10,
+//     number: 10,
+//     alarmTime: '2022/10/22 10:12:36',
+//     alarmType: '故障类别',
+//     alarmPriority: '二级',
+//     alarmDescription: '摄像头02故障，请检查',
+//     alreadyTime: '未处理',
+//   },
+//   {
+//     key: 11,
+//     number: 11,
+//     alarmTime: '2022/10/22 10:12:36',
+//     alarmType: '故障类别',
+//     alarmPriority: '一级',
+//     alarmDescription: '存储空间不足，自动停止保存视频',
+//     alreadyTime: '未处理',
+//   },
+//   {
+//     key: 12,
+//     number: 12,
+//     alarmTime: '2022/10/22 10:12:36',
+//     alarmType: '故障类别',
+//     alarmPriority: '一级',
+//     alarmDescription: '04摄像头，受电弓故障，请确认并联系人员检修',
+//     alreadyTime: '未处理',
+//   },
+// ];
 
-
-  {
-    key: 7,
-    number: 7,
-    alarmTime: '2022/10/22 10:12:36',
-    alarmType: '故障类别',
-    alarmPriority: '三级',
-    alarmDescription: '摄像头05已关闭，请检查',
-    alreadyTime: '',
-  },
-  {
-    key: 8,
-    number: 8,
-    alarmTime: '2022/10/22 10:12:36',
-    alarmType: '故障类别',
-    alarmPriority: '一级',
-    alarmDescription: '摄像头03已关闭，请检查',
-    alreadyTime: '已处理',
-  },
-  {
-    key: 9,
-    number: 9,
-    alarmTime: '2022/10/22 10:12:36',
-    alarmType: '故障类别',
-    alarmPriority: '二级',
-    alarmDescription: '摄像头01被部分遮挡，请检查',
-    alreadyTime: '',
-  },
-  {
-    key: 10,
-    number: 10,
-    alarmTime: '2022/10/22 10:12:36',
-    alarmType: '故障类别',
-    alarmPriority: '二级',
-    alarmDescription: '摄像头02故障，请检查',
-    alreadyTime: '未处理',
-  },
-  {
-    key: 11,
-    number: 11,
-    alarmTime: '2022/10/22 10:12:36',
-    alarmType: '故障类别',
-    alarmPriority: '一级',
-    alarmDescription: '存储空间不足，自动停止保存视频',
-    alreadyTime: '未处理',
-  },
-  {
-    key: 12,
-    number: 12,
-    alarmTime: '2022/10/22 10:12:36',
-    alarmType: '故障类别',
-    alarmPriority: '一级',
-    alarmDescription: '04摄像头，受电弓故障，请确认并联系人员检修',
-    alreadyTime: '未处理',
-  },
-];
 
 export default {
   name: "Dashboard",
@@ -282,12 +285,12 @@ export default {
           this.cameraOnlineNum = res.data.cameraOnlineNum;
           this.storageCapacity = res.data.storageCapacity;
           this.storageUsedCapacity = res.data.storageUsedCapacity;
-          this.storageFreeCapacity = res.data.storageCapacity - res.data.storageUsedCapacity;
+          this.storageFreeCapacity = this.storageCapacity - this.storageUsedCapacity;
         } else {
-          this.$message.warn('数据请求失败');
+          this.$message.error(res.message);
         }
       }).catch(err => {
-        this.$message.error(err.code+'!  '+err.message)
+        this.$message.error(err.code + '!  ' + err.message)
       })
     },
     getLastAlarm() {
@@ -296,38 +299,38 @@ export default {
       }).then(res => {
         if (res.code == 0) {
 
-              // key: 1,
-              // number: 1,
-              // alarmTime: '2022/10/22 10:12:36',
-              // alarmType: '故障类别',
-              // alarmPriority: '三级',
-              // alarmDescription: '摄像头05已关闭，请检查',
-              // alreadyTime: '',
+          // key: 1,
+          // number: 1,
+          // alarmTime: '2022/10/22 10:12:36',
+          // alarmType: '故障类别',
+          // alarmPriority: '三级',
+          // alarmDescription: '摄像头05已关闭，请检查',
+          // alreadyTime: '',
 
 
-              // "id": "",
-              // "deviceId": "",
-              // "channelId": "",
-              // "alarmPriority": "",
-              // "alarmTime": "",
-              // "alarmDescription": "",
-              // "alarmType": "",
-              // "createTime": "",
-              // "alreadyTime": "",
-              // "alreadyUser": 0,
-              // "alreadyUserName": ""
+          // "id": "",
+          // "deviceId": "",
+          // "channelId": "",
+          // "alarmPriority": "",
+          // "alarmTime": "",
+          // "alarmDescription": "",
+          // "alarmType": "",
+          // "createTime": "",
+          // "alreadyTime": "",
+          // "alreadyUser": 0,
+          // "alreadyUserName": ""
           //最近24小时告警信息，不存在分页查询情况，故在该处清除tableData
           this.tableData = [];
           const resData = res.data;
           const len = res.data.length;
           for (let i = 1; i <= len; i++) {
-            const info=resData[i-1];
-            info.key=info.number=i;
+            const info = resData[i - 1];
+            info.key = info.number = i;
             tableData.push(info);
           }
         }
       }).catch(err => {
-        this.$message.error(err.code+'!  '+err.message)
+        this.$message.error(err.code + '!  ' + err.message)
       })
     },
   },

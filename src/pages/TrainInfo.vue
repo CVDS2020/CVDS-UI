@@ -37,9 +37,9 @@ export default {
   },
   data() {
     return {
-      trainNo: '001',
-      model: '复兴号',
-      carriageNum: 8,
+      trainNo: '',
+      model: '',
+      carriageNum: 0,
       longitude: 0,
       latitude: 0,
 

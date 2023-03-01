@@ -49,7 +49,7 @@
         <a-col :span="2"></a-col>
       </a-row>
     </div>
-    <div style="margin: 20px 0 10px 0">信息列表[共{{tableData.length}}条]</div>
+    <div style="margin: 20px 0 10px 0">信息列表[共{{ tableData.length }}条]</div>
     <a-table
         bordered
         :columns="columns"
@@ -65,10 +65,12 @@ import 'moment/locale/zh-cn';
 import locale from 'ant-design-vue/es/date-picker/locale/zh_CN';
 import moment from 'moment';
 import {request} from "@/network/request";
+
 function isNotEmpty(param) {
   return param && param != ''
 }
 
+const tableData = [];
 const columns = [
   {
     title: '编号',
@@ -104,112 +106,113 @@ const columns = [
     align: 'center'
   },
 ]
-const tableData = [
-  {
-    key: 1,
-    number: 1,
-    createTime: '2022-01-01 01:01:01',
-    typeStr: '',
-    title: 'dfasdsdf',
-    content: '耐烧豆腐哈水淀粉史蒂夫阿水淀粉阿水',
-  },
-  {
-    key: 2,
-    number: 2,
-    createTime: '2022-01-02 01:01:01',
-    typeStr: '',
-    title: 'dfasdsdf',
-    content: '耐烧豆腐哈水淀粉史蒂夫阿水淀粉阿水',
-  },
-  {
-    key: 3,
-    number: 3,
-    createTime: '2022-01-03 01:01:03',
-    typeStr: '',
-    title: 'dfasdsdf',
-    content: '耐烧豆腐哈水淀粉史蒂夫阿水淀粉阿水',
-  },
-  {
-    key: 4,
-    number: 4,
-    createTime: '2022-01-04 01:01:01',
-    typeStr: '',
-    title: 'dfasdsdf',
-    content: '耐烧豆腐哈水淀粉史蒂夫阿水淀粉阿水',
-  },
-  {
-    key: 5,
-    number: 5,
-    createTime: '2022-01-05 01:01:01',
-    typeStr: '',
-    title: 'dfasdsdf',
-    content: '耐烧豆腐哈水淀粉史蒂夫阿水淀粉阿水',
-  },
-  {
-    key: 6,
-    number: 6,
-    createTime: '2022-01-06 01:01:03',
-    typeStr: '',
-    title: 'dfasdsdf',
-    content: '耐烧豆腐哈水淀粉史蒂夫阿水淀粉阿水',
-  },
+// const tableData = [
+//   {
+//     key: 1,
+//     number: 1,
+//     createTime: '2022-01-01 01:01:01',
+//     typeStr: '',
+//     title: 'dfasdsdf',
+//     content: '耐烧豆腐哈水淀粉史蒂夫阿水淀粉阿水',
+//   },
+//   {
+//     key: 2,
+//     number: 2,
+//     createTime: '2022-01-02 01:01:01',
+//     typeStr: '',
+//     title: 'dfasdsdf',
+//     content: '耐烧豆腐哈水淀粉史蒂夫阿水淀粉阿水',
+//   },
+//   {
+//     key: 3,
+//     number: 3,
+//     createTime: '2022-01-03 01:01:03',
+//     typeStr: '',
+//     title: 'dfasdsdf',
+//     content: '耐烧豆腐哈水淀粉史蒂夫阿水淀粉阿水',
+//   },
+//   {
+//     key: 4,
+//     number: 4,
+//     createTime: '2022-01-04 01:01:01',
+//     typeStr: '',
+//     title: 'dfasdsdf',
+//     content: '耐烧豆腐哈水淀粉史蒂夫阿水淀粉阿水',
+//   },
+//   {
+//     key: 5,
+//     number: 5,
+//     createTime: '2022-01-05 01:01:01',
+//     typeStr: '',
+//     title: 'dfasdsdf',
+//     content: '耐烧豆腐哈水淀粉史蒂夫阿水淀粉阿水',
+//   },
+//   {
+//     key: 6,
+//     number: 6,
+//     createTime: '2022-01-06 01:01:03',
+//     typeStr: '',
+//     title: 'dfasdsdf',
+//     content: '耐烧豆腐哈水淀粉史蒂夫阿水淀粉阿水',
+//   },
+//
+//   {
+//     key: 7,
+//     number: 7,
+//     createTime: '2022-01-01 01:01:01',
+//     typeStr: '',
+//     title: 'dfasdsdf',
+//     content: '耐烧豆腐哈水淀粉史蒂夫阿水淀粉阿水',
+//   },
+//   {
+//     key: 8,
+//     number: 8,
+//     createTime: '2022-01-02 01:01:01',
+//     typeStr: '',
+//     title: 'dfasdsdf',
+//     content: '耐烧豆腐哈水淀粉史蒂夫阿水淀粉阿水',
+//   },
+//   {
+//     key: 9,
+//     number: 9,
+//     createTime: '2022-01-03 01:01:03',
+//     typeStr: '',
+//     title: 'dfasdsdf',
+//     content: '耐烧豆腐哈水淀粉史蒂夫阿水淀粉阿水',
+//   },
+//   {
+//     key: 10,
+//     number: 10,
+//     createTime: '2022-01-04 01:01:01',
+//     typeStr: '',
+//     title: 'dfasdsdf',
+//     content: '耐烧豆腐哈水淀粉史蒂夫阿水淀粉阿水',
+//   },
+//   {
+//     key: 11,
+//     number: 11,
+//     createTime: '2022-01-05 01:01:01',
+//     typeStr: '',
+//     title: 'dfasdsdf',
+//     content: '耐烧豆腐哈水淀粉史蒂夫阿水淀粉阿水',
+//   },
+//   {
+//     key: 12,
+//     number: 12,
+//     createTime: '2022-01-06 01:01:03',
+//     typeStr: '',
+//     title: 'dfasdsdf',
+//     content: '耐烧豆腐哈水淀粉史蒂夫阿水淀粉阿水',
+//   },
+// ]
 
-  {
-    key: 7,
-    number: 7,
-    createTime: '2022-01-01 01:01:01',
-    typeStr: '',
-    title: 'dfasdsdf',
-    content: '耐烧豆腐哈水淀粉史蒂夫阿水淀粉阿水',
-  },
-  {
-    key: 8,
-    number: 8,
-    createTime: '2022-01-02 01:01:01',
-    typeStr: '',
-    title: 'dfasdsdf',
-    content: '耐烧豆腐哈水淀粉史蒂夫阿水淀粉阿水',
-  },
-  {
-    key: 9,
-    number: 9,
-    createTime: '2022-01-03 01:01:03',
-    typeStr: '',
-    title: 'dfasdsdf',
-    content: '耐烧豆腐哈水淀粉史蒂夫阿水淀粉阿水',
-  },
-  {
-    key: 10,
-    number: 10,
-    createTime: '2022-01-04 01:01:01',
-    typeStr: '',
-    title: 'dfasdsdf',
-    content: '耐烧豆腐哈水淀粉史蒂夫阿水淀粉阿水',
-  },
-  {
-    key: 11,
-    number: 11,
-    createTime: '2022-01-05 01:01:01',
-    typeStr: '',
-    title: 'dfasdsdf',
-    content: '耐烧豆腐哈水淀粉史蒂夫阿水淀粉阿水',
-  },
-  {
-    key: 12,
-    number: 12,
-    createTime: '2022-01-06 01:01:03',
-    typeStr: '',
-    title: 'dfasdsdf',
-    content: '耐烧豆腐哈水淀粉史蒂夫阿水淀粉阿水',
-  },
-]
 export default {
   name: "SysLog",
   data() {
     return {
       columns,
       tableData,
-      allowClear:false,
+      allowClear: false,
       dateFormat: 'YYYY-MM-DD',
       timeFormat: 'HH:mm:ss',
       startDateString: '',
@@ -237,8 +240,7 @@ export default {
       },
     };
   },
-  computed: {
-  },
+  computed: {},
   methods: {
     moment,
     onStartDateChange(date, dateString) {
@@ -264,17 +266,17 @@ export default {
         params: {
           page: this.pagination.current,
           count: this.count,
-          startTime: this.startDateString+' '+this.startTimeString,
-          endTime:this.endDateString+' '+this.endTimeString,
+          startTime: this.startDateString + ' ' + this.startTimeString,
+          endTime: this.endDateString + ' ' + this.endTimeString,
           type: 0,//0系统日志  1操作日志
         }
       }).then(res => {
-        if(res.code==0){
+        if (res.code == 0) {
           const resData = res.data;
           const resTableData = resData.list;
           const len = resTableData.length;
-          if(res.data.isFirstPage){
-            this.tableData=[];
+          if (res.data.isFirstPage) {
+            this.tableData = [];
           }
           for (let i = 1; i <= len; i++) {
             //     key: 12,
@@ -284,15 +286,17 @@ export default {
             //     title: 'dfasdsdf',
             //     content: '耐烧豆腐哈水淀粉史蒂夫阿水淀粉阿水',
             const info = resTableData[i - 1];
-            info.key=info.number=i;
-            info.typeStr='';
+            info.key = info.number = i;
+            info.typeStr = '';
             this.tableData.push(info);
           }
-        }else {
+        } else {
           this.$message.error(res.message);
         }
 
-      }).catch(err => { this.$message.error(err.code+'!  '+err.message)})
+      }).catch(err => {
+        this.$message.error(err.code + '!  ' + err.message)
+      })
     },
     onPaginationClicked(e) {
       // console.log(e)
@@ -312,32 +316,32 @@ export default {
       this.endTimeString = '';
     },
     onQueryBtnClicked() {
-      if(!isNotEmpty(this.startDateString)){
+      if (!isNotEmpty(this.startDateString)) {
         this.$message.warn('开始日期不能为空！');
         return;
       }
-      if(!isNotEmpty(this.startTimeString)){
+      if (!isNotEmpty(this.startTimeString)) {
         this.$message.warn('开始时间不能为空！');
         return;
       }
-      if(!isNotEmpty(this.endDateString)){
+      if (!isNotEmpty(this.endDateString)) {
         this.$message.warn('结束日期不能为空！');
         return;
       }
-      if(!isNotEmpty(this.endTimeString)){
+      if (!isNotEmpty(this.endTimeString)) {
         this.$message.warn('结束时间不能为空！');
         return;
       }
-      const s=this.startDateString + ' ' + this.startTimeString;
-      const e=this.endDateString + ' ' + this.endTimeString;
-      if(s>e){
+      const s = this.startDateString + ' ' + this.startTimeString;
+      const e = this.endDateString + ' ' + this.endTimeString;
+      if (s < e) {
         this.cleanPicker();
         this.$message.warn("开始时间不能大于结束时间");
         return;
       }
       this.getTableData();
     },
-    cleanPicker(){
+    cleanPicker() {
       this.startDateString = '';
       this.startDate = null;
       this.startTimeString = '';
@@ -349,9 +353,9 @@ export default {
     },
   },
   created() {
-    this.endDateString=moment(new Date()).format(this.dateFormat);
-    this.startTimeString= this.endTimeString=moment(new Date()).format(this.timeFormat);
-    this.startDateString=moment().subtract(23,'hours').format(this.dateFormat);
+    this.endDateString = moment(new Date()).format(this.dateFormat);
+    this.startTimeString = this.endTimeString = moment(new Date()).format(this.timeFormat);
+    this.startDateString = moment().subtract(23, 'hours').format(this.dateFormat);
 
     this.getTableData()
   }

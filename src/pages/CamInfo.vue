@@ -37,7 +37,7 @@
         </a-col>
         <a-col :span="2" class="left-txt">关键字：</a-col>
         <a-col :span="7">
-          <a-input v-model="keyword" placeholder="请输入关键字"></a-input>
+          <a-input v-model="keyword" placeholder="请输入关键字" maxLength="60"></a-input>
         </a-col>
         <a-col :span="6"></a-col>
         <a-col :span="2">
@@ -419,7 +419,7 @@ import PageTitle from "@/components/PageTitle";
 function isNotEmpty(param) {
   return param && param != ''
 }
-
+const tableData=[];
 const columns = [
   {
     title: '编号',
@@ -491,118 +491,119 @@ const columns = [
     align: 'center'
   }
 ];
-const tableData = [
-  // id	数据库自增ID	integer
-  // deviceId	设备国标编号	string
-  // name	设备名	string
-  // superviseTargetType	监视物类型	integer
-  // superviseTargetTypeName	监视物类型名称	string
-  // superviseTargetId	监视物ID	integer
-  // superviseTargetName	监视物名称	string
-  // carriageNo	车厢号	integer
-  // position	摄像机位置	string
-  // ip	摄像机IP	string
-  // online	摄像机在线状态, 0 离线, 1 在线	string
-  // superviseTargetStatus	监视物状态, 0-正常，转向架异常（1-温度异常，2-检测到异物，3-部件缺失），受电弓姿态异常（100-降弓，101-升弓），受电弓实体异常（201-受电弓燃弧、202-受电弓异物、203-受电弓变形、204-右弓角缺失、205-左弓角缺失），受电弓温度异常（300-受电弓温度异常，statusText字段补充温度范围）	integer
-  // superviseTargetStatusText 监视物状态描述
-  {
-    key: 1,
-    number: 1,
-    name: '摄像头01',
-    model: '',
-    superviseTargetType: 1,
-    superviseTargetTypeName: '受电弓',
-    superviseTargetId: 1,
-    superviseTargetName: '受电弓1',
-    carriageNo: 1,
-    position: '受电弓位置01',
-    ip: '192.168.1.1',
-    onlineText: '在线',
-    superviseTargetStatusText: '正常',
-    operation: '',
-  },
-  {
-    key: 2,
-    number: 2,
-    name: '摄像头02',
-    model: '',
-    superviseTargetType: 2,
-    superviseTargetTypeName: '受电弓',
-    superviseTargetId: 2,
-    superviseTargetName: '受电弓2',
-    carriageNo: 2,
-    position: '受电弓位置01',
-    ip: '192.168.1.2',
-    onlineText: '在线',
-    superviseTargetStatusText: '正常',
-    operation: ''
-  },
-  {
-    key: 3,
-    number: 3,
-    name: '摄像头03',
-    model: '',
-    superviseTargetType: 3,
-    superviseTargetTypeName: '受电弓3',
-    superviseTargetId: 3,
-    superviseTargetName: '受电弓3',
-    carriageNo: 3,
-    position: '受电弓位置01',
-    ip: '192.168.1.3',
-    onlineText: '在线',
-    superviseTargetStatusText: '正常',
-    operation: ''
-  },
-  {
-    key: 4,
-    number: 4,
-    name: '摄像头04',
-    model: '',
-    superviseTargetType: 4,
-    superviseTargetTypeName: '受电弓4',
-    superviseTargetId: 4,
-    superviseTargetName: '受电弓4',
-    carriageNo: 4,
-    position: '受电弓位置01',
-    ip: '192.168.1.4',
-    onlineText: '在线',
-    superviseTargetStatusText: '正常',
-    operation: ''
-  },
-  {
-    key: 5,
-    number: 5,
-    name: '摄像头05',
-    model: '',
-    superviseTargetType: 5,
-    superviseTargetTypeName: '受电弓5',
-    superviseTargetId: 5,
-    superviseTargetName: '受电弓5',
-    carriageNo: 5,
-    position: '受电弓位置01',
-    ip: '192.168.1.5',
-    onlineText: '离线',
-    superviseTargetStatusText: '异常',
-    operation: ''
-  },
-  {
-    key: 6,
-    number: 6,
-    name: '摄像头06',
-    model: '',
-    superviseTargetType: 6,
-    superviseTargetTypeName: '受电弓6',
-    superviseTargetId: 6,
-    superviseTargetName: '受电弓6',
-    carriageNo: 6,
-    position: '受电弓位置01',
-    ip: '192.168.1.6',
-    onlineText: '在线',
-    superviseTargetStatusText: '正常',
-    operation: ''
-  },
+// const tableData = [
+//   // id	数据库自增ID	integer
+//   // deviceId	设备国标编号	string
+//   // name	设备名	string
+//   // superviseTargetType	监视物类型	integer
+//   // superviseTargetTypeName	监视物类型名称	string
+//   // superviseTargetId	监视物ID	integer
+//   // superviseTargetName	监视物名称	string
+//   // carriageNo	车厢号	integer
+//   // position	摄像机位置	string
+//   // ip	摄像机IP	string
+//   // online	摄像机在线状态, 0 离线, 1 在线	string
+//   // superviseTargetStatus	监视物状态, 0-正常，转向架异常（1-温度异常，2-检测到异物，3-部件缺失），受电弓姿态异常（100-降弓，101-升弓），受电弓实体异常（201-受电弓燃弧、202-受电弓异物、203-受电弓变形、204-右弓角缺失、205-左弓角缺失），受电弓温度异常（300-受电弓温度异常，statusText字段补充温度范围）	integer
+//   // superviseTargetStatusText 监视物状态描述
+//   {
+//     key: 1,
+//     number: 1,
+//     name: '摄像头01',
+//     model: '',
+//     superviseTargetType: 1,
+//     superviseTargetTypeName: '受电弓',
+//     superviseTargetId: 1,
+//     superviseTargetName: '受电弓1',
+//     carriageNo: 1,
+//     position: '受电弓位置01',
+//     ip: '192.168.1.1',
+//     onlineText: '在线',
+//     superviseTargetStatusText: '正常',
+//     operation: '',
+//   },
+//   {
+//     key: 2,
+//     number: 2,
+//     name: '摄像头02',
+//     model: '',
+//     superviseTargetType: 2,
+//     superviseTargetTypeName: '受电弓',
+//     superviseTargetId: 2,
+//     superviseTargetName: '受电弓2',
+//     carriageNo: 2,
+//     position: '受电弓位置01',
+//     ip: '192.168.1.2',
+//     onlineText: '在线',
+//     superviseTargetStatusText: '正常',
+//     operation: ''
+//   },
+//   {
+//     key: 3,
+//     number: 3,
+//     name: '摄像头03',
+//     model: '',
+//     superviseTargetType: 3,
+//     superviseTargetTypeName: '受电弓3',
+//     superviseTargetId: 3,
+//     superviseTargetName: '受电弓3',
+//     carriageNo: 3,
+//     position: '受电弓位置01',
+//     ip: '192.168.1.3',
+//     onlineText: '在线',
+//     superviseTargetStatusText: '正常',
+//     operation: ''
+//   },
+//   {
+//     key: 4,
+//     number: 4,
+//     name: '摄像头04',
+//     model: '',
+//     superviseTargetType: 4,
+//     superviseTargetTypeName: '受电弓4',
+//     superviseTargetId: 4,
+//     superviseTargetName: '受电弓4',
+//     carriageNo: 4,
+//     position: '受电弓位置01',
+//     ip: '192.168.1.4',
+//     onlineText: '在线',
+//     superviseTargetStatusText: '正常',
+//     operation: ''
+//   },
+//   {
+//     key: 5,
+//     number: 5,
+//     name: '摄像头05',
+//     model: '',
+//     superviseTargetType: 5,
+//     superviseTargetTypeName: '受电弓5',
+//     superviseTargetId: 5,
+//     superviseTargetName: '受电弓5',
+//     carriageNo: 5,
+//     position: '受电弓位置01',
+//     ip: '192.168.1.5',
+//     onlineText: '离线',
+//     superviseTargetStatusText: '异常',
+//     operation: ''
+//   },
+//   {
+//     key: 6,
+//     number: 6,
+//     name: '摄像头06',
+//     model: '',
+//     superviseTargetType: 6,
+//     superviseTargetTypeName: '受电弓6',
+//     superviseTargetId: 6,
+//     superviseTargetName: '受电弓6',
+//     carriageNo: 6,
+//     position: '受电弓位置01',
+//     ip: '192.168.1.6',
+//     onlineText: '在线',
+//     superviseTargetStatusText: '正常',
+//     operation: ''
+//   },
+//
+// ];
 
-];
 export default {
   name: "CamInfo",
   components: {
@@ -868,7 +869,6 @@ export default {
         showQuickJumper: false, // 是否可以快速跳转至某页
         showSizeChanger: false // 是否可以改变pageSize
       };
-      this.pagination = 1;
       this.isOnlineHasNextPage = true;
       this.isOffLineHasNextPage = true;
       this.getDevicesTableData();
@@ -881,6 +881,7 @@ export default {
      */
     setAdd() {
       const selectedRowRadioKey = this.selectedRowRadioKeys[0];
+      if(this.tableData.length>0){
       this.add.addInputName = this.tableData[selectedRowRadioKey - 1].name;//input显示用 //网络请求参数
       this.add.addInputIp = this.tableData[selectedRowRadioKey - 1].ip;//input显示用 //网络请求参数
       this.add.addInputPosition = this.tableData[selectedRowRadioKey - 1].position;//input显示用 //网络请求参数
@@ -891,6 +892,7 @@ export default {
       this.add.carriageNo = this.tableData[selectedRowRadioKey - 1].carriageNo;//select显示用 //网络请求参数
       this.add.id = this.tableData[selectedRowRadioKey - 1].id;//select显示用 //网络请求路径
       this.add.deviceId=this.tableData[selectedRowRadioKey - 1].deviceId;
+      }
     },
     setAddVideoConfig(resData) {
       if (!resData) {
@@ -1095,13 +1097,14 @@ export default {
       if (this.selectedRowRadioKeys.length == 1) {
         this.setAdd();
         request({
-          // url: '/api/device/query/devices/'+this.tableData[selectedRowRadioKey - 1].deviceId+'/delete',
           url: '/api/device/query/devices/' + this.add.id + '/delete',
           method: 'delete',
         }).then(res => {
           if (res.code == 200) {
             this.onModalClean();
             this.refreshTable();
+          }else{
+            this.$message.error(res.message);
           }
         }).catch(err => {
           this.onModalClean();

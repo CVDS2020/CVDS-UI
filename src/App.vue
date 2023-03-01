@@ -45,8 +45,8 @@ export default {
     return {
       flag: 0,
       locale: zhCN,
-      modalVisible: this.$store.state.loginVisible,
-      // modalVisible: false,
+      // modalVisible: this.$store.state.loginVisible,
+      modalVisible: false,
       userName: 'admin',
       pwd: 'admin',
     };

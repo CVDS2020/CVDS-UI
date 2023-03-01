@@ -264,11 +264,12 @@
           </a-radio-group>
         </div>
       </div>
-      <div style="flex-direction: row; justify-content: center;margin-top: 20px">
-        <span>导出路径：</span>
-        <a-input style="width: 250px;margin-right: 10px" :value="inputPath"></a-input>
-        <a-button @click="test">浏览</a-button>
-      </div>
+      <!--应用无法更改下载路径，只能在浏览器设置-->
+<!--      <div style="flex-direction: row; justify-content: center;margin-top: 20px">-->
+<!--        <span>导出路径：</span>-->
+<!--        <a-input style="width: 250px;margin-right: 10px" :value="inputPath"></a-input>-->
+<!--        <a-button @click="test">浏览</a-button>-->
+<!--      </div>-->
 
       <template #footer>
         <a-button @click="onDownloadRecordResetBtnClicked">重置</a-button>
@@ -288,7 +289,7 @@ import PageTitle from "@/components/PageTitle";
 function isNotEmpty(param) {
   return param && param != ''
 }
-
+const tableData=[];
 const columns = [
   {
     title: '编号',
@@ -344,33 +345,34 @@ const columns = [
     scopedSlots: {customRender: 'operation'}
   }
 ];
-const tableData = [
-  {
-    key: '1',
-    number: '1',
-    diskNo: '01',
-    type: 1,
-    typeName: '外挂',
-    status: '正常',
-    capacity: '2048',
-    usedCapacity: '512',
-    freeCapacity: '1536',
-    operation: ''
-  },
-  {
-    key: '2',
-    number: '2',
-    diskNo: '01',
-    type: 0,
-    typeName: '本地',
-    status: '正常',
-    capacity: '2048',
-    usedCapacity: '512',
-    freeCapacity: '1536',
-    operation: ''
-  },
+// const tableData = [
+//   {
+//     key: '1',
+//     number: '1',
+//     diskNo: '01',
+//     type: 1,
+//     typeName: '外挂',
+//     status: '正常',
+//     capacity: '2048',
+//     usedCapacity: '512',
+//     freeCapacity: '1536',
+//     operation: ''
+//   },
+//   {
+//     key: '2',
+//     number: '2',
+//     diskNo: '01',
+//     type: 0,
+//     typeName: '本地',
+//     status: '正常',
+//     capacity: '2048',
+//     usedCapacity: '512',
+//     freeCapacity: '1536',
+//     operation: ''
+//   },
+//
+// ];
 
-];
 export default {
   name: "StorInfo",
   components: {
@@ -383,7 +385,7 @@ export default {
       storageConfigModalVisible: false,
       downloadRecordModalVisible: false,
 
-      inputPath: 'c:\\users\\exportfile',
+      inputPath: '',
 
       diskNoList: ['0',],
       diskNo: '0',
@@ -518,7 +520,10 @@ export default {
 
               this.tableData.push(info)
               if (res.data.diskNo) this.diskNoList.push(res.data.diskNo);
+              console.log('1111----->',this.tableData)
+
             }
+            console.log('----->',this.tableData)
           } catch (e) {
             this.$message.error(e)
           }
@@ -725,7 +730,7 @@ export default {
       }
       const s=this.startDateString + ' ' + this.startTimeString;
       const e=this.endTimeString + ' ' + this.endTimeString;
-      if(s>e){
+      if(s<e){
         this.cleanPicker();
         this.$message.warn("开始时间不能大于结束时间");
         return;

@@ -116,6 +116,7 @@ import {request} from "@/network/request";
 function isNotEmpty(param) {
   return param && param != ''
 }
+const tableData=[];
 const columns = [
   {
     title: '编号',
@@ -166,38 +167,39 @@ const columns = [
     align: 'center',
   },
 ];
-const tableData = [
-  {
-    key: 1,
-    number: 1,
-    alarmTime: '2022-01-01 01:01:01',
-    alarmType:'',
-    alarmPriority:'二级警情',
-    alarmDescription:'收到徐教练咖啡',
-    already:'未处理',
-    alreadyUserName:'administator',
-  },
-  {
-    key: 2,
-    number: 2,
-    alarmTime: '2022-01-03 01:04:01',
-    alarmType:'',
-    alarmPriority:'一级警情',
-    alarmDescription:'收到徐教练咖啡',
-    already:'已处理',
-    alreadyUserName:'administator',
-  },
-  {
-    key: 3,
-    number: 3,
-    alarmTime: '2022-01-03 01:32:01',
-    alarmType:'',
-    alarmPriority:'三级警情',
-    alarmDescription:'收到徐教练咖啡',
-    already:'已处理',
-    alreadyUserName:'administator',
-  },
-  ]
+// const tableData = [
+//   {
+//     key: 1,
+//     number: 1,
+//     alarmTime: '2022-01-01 01:01:01',
+//     alarmType:'',
+//     alarmPriority:'二级警情',
+//     alarmDescription:'收到徐教练咖啡',
+//     already:'未处理',
+//     alreadyUserName:'administator',
+//   },
+//   {
+//     key: 2,
+//     number: 2,
+//     alarmTime: '2022-01-03 01:04:01',
+//     alarmType:'',
+//     alarmPriority:'一级警情',
+//     alarmDescription:'收到徐教练咖啡',
+//     already:'已处理',
+//     alreadyUserName:'administator',
+//   },
+//   {
+//     key: 3,
+//     number: 3,
+//     alarmTime: '2022-01-03 01:32:01',
+//     alarmType:'',
+//     alarmPriority:'三级警情',
+//     alarmDescription:'收到徐教练咖啡',
+//     already:'已处理',
+//     alreadyUserName:'administator',
+//   },
+//   ]
+
 export default {
   name: "AlarmInfo",
   components: {PageTitle},
@@ -372,7 +374,7 @@ export default {
       }
       const s=this.startDateString + ' ' + this.startTimeString;
       const e=this.endDateString + ' ' + this.endTimeString;
-      if(s>e){
+      if(s<e){
         this.cleanPicker();
         this.$message.warn("开始时间不能大于结束时间");
         return;
