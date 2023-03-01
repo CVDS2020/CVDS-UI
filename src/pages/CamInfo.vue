@@ -639,7 +639,7 @@ export default {
       /*   /api/device/query/devices请求参数    start   */
       inputCarriageNo: undefined,//车厢号
       selectedSuperviseType: {name: '', type: undefined},//监视类型  name用于select中显示，此处默认值设设置为''，type用于网络请求时的参数
-      online: true,//在线状态
+      online: undefined,//undefine-全部 true-在线 false-离线
       keyword: undefined,//关键字
       isOnlineHasNextPage: true,
       isOffLineHasNextPage: true,
@@ -695,12 +695,12 @@ export default {
     },
     getDevicesTableData() {
       //判断后端是否有新数据，无新数据则不进行网络请求
-      if (this.online && !this.isOnlineHasNextPage) {
-        return;
-      }
-      if (!this.online && !this.isOfflineHasNextPage) {
-        return;
-      }
+      // if (this.online && !this.isOnlineHasNextPage) {
+      //   return;
+      // }
+      // if (!this.online && !this.isOfflineHasNextPage) {
+      //   return;
+      // }
 
       const params = {};
       //必传参数
@@ -710,7 +710,7 @@ export default {
       if (isNotEmpty(this.keyword)) {
         params.keyword = this.keyword;
       }
-      if (isNotEmpty(this.online)) {
+      if (this.online!==undefined) {
         params.online = this.online;
       }
       if (isNotEmpty(this.inputCarriageNo)) {
