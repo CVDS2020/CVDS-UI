@@ -724,43 +724,43 @@ export default {
         params,
       }).then(res => {
             //假数据
-            res = {
-              "code": 0,
-              "data": {
-                "endRow": 0,
-                "hasNextPage": false,
-                "hasPreviousPage": false,
-                "isFirstPage": true,
-                "isLastPage": true,
-                "list": [{
-                  "carriageNo": 1,
-                  "deviceId":'44010200491320000122',
-                  "id":2,
-                  "ip":'192.168.1.122',
-                  "name": '192.168.1.122',
-                  "online":'1',
-                  "position": '车厢顶部',
-                  "superviseTargetId": 1,
-                  "superviseTargetTypeName": '1车厢受电弓',
-                  "superviseTargetStatus":0,
-                  "superviseTargetStatusText":'正常',
-                  "superviseTargetType": 1,
-                }],
-                "navigateFirstPage": 0,
-                "navigateLastPage": 0,
-                "navigatePages": 8,
-                "navigatepageNums": [],
-                "nextPage": 0,
-                "pageNum": 1,
-                "pageSize": 0,
-                "pages": 0,
-                "prePage": 0,
-                "size": 0,
-                "startRow": 0,
-                "total": 0
-              },
-              "message": "成功"
-            }
+            // res = {
+            //   "code": 0,
+            //   "data": {
+            //     "endRow": 0,
+            //     "hasNextPage": false,
+            //     "hasPreviousPage": false,
+            //     "isFirstPage": true,
+            //     "isLastPage": true,
+            //     "list": [{
+            //       "carriageNo": 1,
+            //       "deviceId":'44010200491320000122',
+            //       "id":2,
+            //       "ip":'192.168.1.122',
+            //       "name": '192.168.1.122',
+            //       "online":'1',
+            //       "position": '车厢顶部',
+            //       "superviseTargetId": 1,
+            //       "superviseTargetTypeName": '1车厢受电弓',
+            //       "superviseTargetStatus":0,
+            //       "superviseTargetStatusText":'正常',
+            //       "superviseTargetType": 1,
+            //     }],
+            //     "navigateFirstPage": 0,
+            //     "navigateLastPage": 0,
+            //     "navigatePages": 8,
+            //     "navigatepageNums": [],
+            //     "nextPage": 0,
+            //     "pageNum": 1,
+            //     "pageSize": 0,
+            //     "pages": 0,
+            //     "prePage": 0,
+            //     "size": 0,
+            //     "startRow": 0,
+            //     "total": 0
+            //   },
+            //   "message": "成功"
+            // }
             try {
               if (res.code == 0) {
                 const resData = res.data;
