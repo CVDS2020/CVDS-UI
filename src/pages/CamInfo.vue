@@ -37,7 +37,7 @@
         </a-col>
         <a-col :span="2" class="left-txt">关键字：</a-col>
         <a-col :span="7">
-          <a-input v-model="keyword" placeholder="请输入关键字" maxLength="60"></a-input>
+          <a-input v-model="keyword" placeholder="请输入关键字" :maxLength="60"></a-input>
         </a-col>
         <a-col :span="6"></a-col>
         <a-col :span="2">

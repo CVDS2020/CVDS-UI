@@ -44,6 +44,7 @@ export default {
       flag: 0,
       locale: zhCN,
       modalVisible: this.$store.state.loginVisible,
+      //todo 调试时使用
       // modalVisible: false,
       userName: 'admin',
       pwd: 'admin',

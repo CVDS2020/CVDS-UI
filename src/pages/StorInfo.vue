@@ -520,10 +520,8 @@ export default {
 
               this.tableData.push(info)
               if (res.data.diskNo) this.diskNoList.push(res.data.diskNo);
-              console.log('1111----->',this.tableData)
 
             }
-            console.log('----->',this.tableData)
           } catch (e) {
             this.$message.error(e)
           }

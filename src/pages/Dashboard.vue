@@ -3,7 +3,7 @@
     <div class="charts">
       <a-card class="card">
         <div class="progress-title-txt">板卡在线数量</div>
-        <a-progress class="progress" width="300px" type="circle" :percent="100">
+        <a-progress class="progress" :width="300" type="circle" :percent="100">
           <template #format="percent">
             <div style="flex-direction: column">
               <div class="progress-center-txt">{{ cardNum == 0 ? 0 : (cardOnlineNum / cardNum) * 100 }}%</div>
@@ -17,7 +17,7 @@
 
       <a-card class="card">
         <div class="progress-title-txt">摄像头在线数量</div>
-        <a-progress class="progress" width="300px" type="circle" :percent="100">
+        <a-progress class="progress" :width="300" type="circle" :percent="100">
           <template #format="percent">
             <div style="flex-direction: column">
               <div class="progress-center-txt">{{ cameraNum == 0 ? 0 : (cameraOnlineNum / cameraNum) * 100 }}%</div>
@@ -30,7 +30,7 @@
       </a-card>
       <a-card class="card">
         <div class="progress-title-txt">本地存储空间</div>
-        <a-progress class="progress" width="300px" type="circle" :percent="100">
+        <a-progress class="progress" :width="300" type="circle" :percent="100">
           <template #format="percent">
             <div style="flex-direction: column">
               <div class="progress-center-txt">

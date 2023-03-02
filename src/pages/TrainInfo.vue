@@ -11,11 +11,11 @@
           <span class="span height line-height">纬度</span>
         </div>
         <div class="container2">
-          <a-input class="height space input" disabled="true" v-model="trainNo"></a-input>
-          <a-input class="height space input" disabled="true" v-model="model"></a-input>
-          <a-input class="height space input" disabled="true" v-model="trainNo"></a-input>
-          <a-input class="height space input" disabled="true" v-model="longitude"></a-input>
-          <a-input class="height space input" disabled="true" v-model="latitude"></a-input>
+          <a-input class="height space input" :disabled="true" v-model="trainNo"></a-input>
+          <a-input class="height space input" :disabled="true" v-model="model"></a-input>
+          <a-input class="height space input" :disabled="true" v-model="trainNo"></a-input>
+          <a-input class="height space input" :disabled="true" v-model="longitude"></a-input>
+          <a-input class="height space input" :disabled="true" v-model="latitude"></a-input>
         </div>
         <div class="container2 direction">
           <span class="height line-height">（北纬）</span>
