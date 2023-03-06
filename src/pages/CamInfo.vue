@@ -120,9 +120,6 @@
           </a-popconfirm>
         </div>
       </template>
-      <!--      <template #name="{ record }">              //:data数据-->
-      <!--        <a-button type="primary" ghost @click="hide(record)">编辑</a-button>-->
-      <!--      </template>-->
     </a-table>
 
     <!--所有modal独立显示-->
@@ -144,13 +141,13 @@
           <a-col :span="7">
             <a-select
                 class="select"
-                :value="add.superviseTargetTypeName"
+                :value="add.targetSuperviseTypeName"
                 @change="onAddSuperviseTypeSelectChange"
             >
               <a-select-option
-                  v-for="(item,index) of superviseList"
+                  v-for="(item,index) of superviseTypeList"
                   :key="index">
-                {{ item.typeName }}
+                {{ item.name }}
               </a-select-option>
             </a-select>
           </a-col>
@@ -159,11 +156,6 @@
         <a-row class="card-item">
           <a-col :span="5" class="left-txt">所在车厢：</a-col>
           <a-col :span="7">
-            <!--
-            :value="add.carriageNo+''"      +''为了解决未知错误
-            superviseList: [{name: '受电弓1', carriageNo: 1, id: 1}, {name: '受电弓2', carriageNo:2, id:2}, {name: '受电弓3', carriageNo:3, id:3}],//监视物、所在车厢下拉选择框数据源
-            会发生显示错误，原因未知
-            -->
             <a-select
                 class="select"
                 :value="add.carriageNo+''"
@@ -180,7 +172,7 @@
           <a-col :span="7">
             <a-select
                 class="select"
-                :value="add.superviseTargetName"
+                :value="add.targetSuperviseName"
                 @change="onAddSuperviseNameSelectChange"
             >
               <a-select-option
@@ -228,7 +220,7 @@
           <a-col :span="7">
             <a-select
                 class="select"
-                :value="add.superviseTargetTypeName"
+                :value="add.targetSuperviseTypeName"
                 disabled/>
           </a-col>
         </a-row>
@@ -245,7 +237,7 @@
           <a-col :span="7">
             <a-select
                 class="select"
-                :value="add.superviseTargetName"
+                :value="add.targetSuperviseName"
                 disabled/>
           </a-col>
         </a-row>
@@ -645,22 +637,29 @@ export default {
       isOffLineHasNextPage: true,
       /*   /api/device/query/devices请求参数    end   */
 
-      superviseTypeList: [{type: 4, name: '受电弓'}, {type: 5, name: '转向架'}, {type: 6, name: '车厢'}],
+      superviseTypeList: [
+          //假数据
+        //   {type: 4, name: '受电弓'},
+        // {type: 5, name: '转向架'},
+        // {type: 6, name: '车厢'}
+      ],
       selectedRowRadioKeys: [],//所选中checkbox或radio的key
       sortedInfo: undefined,
       //添加摄像头相关数据
       superviseList: [
-        {typeName: '受电弓', name: '受电弓1', carriageNo: 1, id: 1},
-        {typeName: '转向架', name: '转向架2', carriageNo: 2, id: 2},
-        {typeName: '车厢', name: '车厢3', carriageNo: 3, id: 3}],//监视物类型、监视物、所在车厢下拉选择框数据源
+          //假数据
+        // {typeName: '受电弓', name: '受电弓1', carriageNo: 1, id: 1},
+        // {typeName: '转向架', name: '转向架2', carriageNo: 2, id: 2},
+        // {typeName: '车厢', name: '车厢3', carriageNo: 3, id: 3}
+      ],//监视物类型、监视物、所在车厢下拉选择框数据源
       add: {
         addInputName: '',//input摄像头名称
         addInputIp: '',//inputIP
         addInputPosition: '',//input摄像头位置
-        superviseTargetType: undefined,//监视物类型code
-        superviseTargetTypeName: '',//监视物类型名称
-        superviseTargetId: undefined,//监视物ID
-        superviseTargetName: '',//监视物名称
+        targetSuperviseType: undefined,//监视物类型code
+        targetSuperviseTypeName: '',//监视物类型名称
+        targetSuperviseId: undefined,//监视物ID
+        targetSuperviseName: '',//监视物名称
         carriageNo: '',//所在车厢
         id: undefined,//该值对应值为数据库ID
         deviceId: undefined,//该值对应数值为设备国标ID
@@ -723,7 +722,7 @@ export default {
         url: '/api/device/query/devices',
         params,
       }).then(res => {
-            //假数据
+            // // 假数据
             // res = {
             //   "code": 0,
             //   "data": {
@@ -884,10 +883,10 @@ export default {
       this.add.addInputName = this.tableData[selectedRowRadioKey - 1].name;//input显示用 //网络请求参数
       this.add.addInputIp = this.tableData[selectedRowRadioKey - 1].ip;//input显示用 //网络请求参数
       this.add.addInputPosition = this.tableData[selectedRowRadioKey - 1].position;//input显示用 //网络请求参数
-      this.add.superviseTargetType = this.tableData[selectedRowRadioKey - 1].superviseTargetType;//网络请求参数
-      this.add.superviseTargetTypeName = this.tableData[selectedRowRadioKey - 1].superviseTargetTypeName;//select显示用
-      this.add.superviseTargetId = this.tableData[selectedRowRadioKey - 1].superviseTargetId//网络请求参数
-      this.add.superviseTargetName = this.tableData[selectedRowRadioKey - 1].superviseTargetName//select显示用
+      this.add.targetSuperviseType = this.tableData[selectedRowRadioKey - 1].superviseTargetType;//网络请求参数
+      this.add.targetSuperviseTypeName = this.tableData[selectedRowRadioKey - 1].superviseTargetTypeName;//select显示用
+      this.add.targetSuperviseId = this.tableData[selectedRowRadioKey - 1].superviseTargetId//网络请求参数
+      this.add.targetSuperviseName = this.tableData[selectedRowRadioKey - 1].superviseTargetName//select显示用
       this.add.carriageNo = this.tableData[selectedRowRadioKey - 1].carriageNo;//select显示用 //网络请求参数
       this.add.id = this.tableData[selectedRowRadioKey - 1].id;//select显示用 //网络请求路径
       this.add.deviceId=this.tableData[selectedRowRadioKey - 1].deviceId;
@@ -901,10 +900,10 @@ export default {
       if (isNotEmpty(resData.name)) this.add.addInputName = resData.name;//input显示用 //网络请求参数
       if (isNotEmpty(resData.ip)) this.add.addInputIp = resData.ip;//input显示用 //网络请求参数
       if (isNotEmpty(resData.position)) this.add.addInputPosition = resData.position;//input显示用 //网络请求参数
-      if (isNotEmpty(resData.superviseTargetType)) this.add.superviseTargetType = resData.superviseTargetType;//网络请求参数
-      if (isNotEmpty(resData.superviseTargetTypeName)) this.add.superviseTargetTypeName = resData.superviseTargetTypeName;//select显示用
-      if (isNotEmpty(resData.superviseTargetId)) this.add.superviseTargetId = resData.superviseTargetId//网络请求参数
-      if (isNotEmpty(resData.superviseTargetName)) this.add.superviseTargetName = resData.superviseTargetName//select显示用
+      if (isNotEmpty(resData.superviseTargetType)) this.add.targetSuperviseType = resData.superviseTargetType;//网络请求参数
+      if (isNotEmpty(resData.superviseTargetTypeName)) this.add.targetSuperviseTypeName = resData.superviseTargetTypeName;//select显示用
+      if (isNotEmpty(resData.superviseTargetId)) this.add.targetSuperviseId = resData.superviseTargetId//网络请求参数
+      if (isNotEmpty(resData.superviseTargetName)) this.add.targetSuperviseName = resData.superviseTargetName//select显示用
       if (isNotEmpty(resData.carriageNo)) this.add.carriageNo = resData.carriageNo;//select显示用 //网络请求参数
       if (isNotEmpty(resData.deviceId)) this.add.id = resData.deviceId;//select显示用 //网络请求路径
       if (resData.videoConfig) {
@@ -932,10 +931,10 @@ export default {
       if (isNotEmpty(resData.name)) this.add.addInputName = resData.name;//input显示用 //网络请求参数
       if (isNotEmpty(resData.ip)) this.add.addInputIp = resData.ip;//input显示用 //网络请求参数
       if (isNotEmpty(resData.position)) this.add.addInputPosition = resData.position;//input显示用 //网络请求参数
-      if (isNotEmpty(resData.superviseTargetType)) this.add.superviseTargetType = resData.superviseTargetType;//网络请求参数
-      if (isNotEmpty(resData.superviseTargetTypeName)) this.add.superviseTargetTypeName = resData.superviseTargetTypeName;//select显示用
-      if (isNotEmpty(resData.superviseTargetId)) this.add.superviseTargetId = resData.superviseTargetId//网络请求参数
-      if (isNotEmpty(resData.superviseTargetName)) this.add.superviseTargetName = resData.superviseTargetName//select显示用
+      if (isNotEmpty(resData.superviseTargetType)) this.add.targetSuperviseType = resData.superviseTargetType;//网络请求参数
+      if (isNotEmpty(resData.superviseTargetTypeName)) this.add.targetSuperviseTypeName = resData.superviseTargetTypeName;//select显示用
+      if (isNotEmpty(resData.superviseTargetId)) this.add.targetSuperviseId = resData.superviseTargetId//网络请求参数
+      if (isNotEmpty(resData.superviseTargetName)) this.add.targetSuperviseName = resData.superviseTargetName//select显示用
       if (isNotEmpty(resData.carriageNo)) this.add.carriageNo = resData.carriageNo;//select显示用 //网络请求参数
       if (isNotEmpty(resData.id)) this.add.id = resData.id;
       if (isNotEmpty(resData.deviceId)) this.add.deviceId = resData.deviceId;
@@ -972,8 +971,8 @@ export default {
     },
     //添加设备modal"监视物类型"select
     onAddSuperviseTypeSelectChange(index, option) {
-      this.add.superviseTargetTypeName = this.superviseTypeList[index].name;
-      this.add.superviseTargetType = this.superviseTypeList[index].type;
+      this.add.targetSuperviseTypeName = this.superviseTypeList[index].name;
+      this.add.targetSuperviseType = this.superviseTypeList[index].type;
     },
     //添加设备modal"所在车厢"select
     onAddCarriageNoSelectChange(index, option) {
@@ -981,8 +980,8 @@ export default {
     },
     //添加设备modal"监视物(名称)"select
     onAddSuperviseNameSelectChange(index, option) {
-      this.add.superviseTargetName = this.superviseList[index].name;
-      this.add.superviseTargetId = this.superviseList[index].id;
+      this.add.targetSuperviseName = this.superviseList[index].name;
+      this.add.targetSuperviseId = this.superviseList[index].id;
     },
     /**
      * 将add{}、videoConfig{}、modalTitle、selectedRowRadioKeys重置
@@ -996,10 +995,10 @@ export default {
       this.add.addInputName = '';
       this.add.addInputIp = '';
       this.add.addInputPosition = '';
-      this.add.superviseTargetType = undefined;
-      this.add.superviseTargetTypeName = '';
-      this.add.superviseTargetId = undefined;
-      this.add.superviseTargetName = '';
+      this.add.targetSuperviseType = undefined;
+      this.add.targetSuperviseTypeName = '';
+      this.add.targetSuperviseId = undefined;
+      this.add.targetSuperviseName = '';
       this.add.carriageNo = '';
       this.add.id = undefined;
       this.add.deviceId = undefined;
@@ -1033,8 +1032,8 @@ export default {
         if (isNotEmpty(this.add.deviceId)) params.deviceId = this.add.deviceId;
         if (isNotEmpty(this.add.addInputName)) params.name = this.add.addInputName;
 
-        if (isNotEmpty(this.add.superviseTargetType)) params.superviseTargetType = this.add.superviseTargetType;
-        if (isNotEmpty(this.add.superviseTargetId)) params.superviseTargetId = this.add.superviseTargetId;
+        if (isNotEmpty(this.add.targetSuperviseType)) params.superviseTargetType = this.add.targetSuperviseType;
+        if (isNotEmpty(this.add.targetSuperviseId)) params.superviseTargetId = this.add.targetSuperviseId;
         if (isNotEmpty(this.add.carriageNo)) params.carriageNo = this.add.carriageNo;
         if (isNotEmpty(this.add.addInputPosition)) params.position = this.add.addInputPosition;
         request({
@@ -1083,6 +1082,11 @@ export default {
         }
       } else if (this.modalTitle === '添加摄像头') {
         this.addModalVisible = true;
+      }
+      //modal显示后再加载"监视物类型"，"所在车厢"、"监视物"select数据
+      if(this.addModalVisible){
+        this.getSuperviseTypeList();//"监视物类型"
+        this.getSuperviseList();//"所在车厢"、"监视物"
       }
     },
     onDeleteBtnClicked() {
@@ -1246,8 +1250,6 @@ export default {
     this.getSuperviseTypeList();
     //主页面初始化时，请求table中的数据源
     this.getDevicesTableData();
-    //添加、编辑摄像头modal中"监视物"select中数据源
-    this.getSuperviseList();
   }
 }
 </script>
