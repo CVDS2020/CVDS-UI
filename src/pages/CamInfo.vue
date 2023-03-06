@@ -141,7 +141,7 @@
           <a-col :span="7">
             <a-select
                 class="select"
-                :value="add.targetSuperviseTypeName"
+                :value="add.superviseTargetTypeName"
                 @change="onAddSuperviseTypeSelectChange"
             >
               <a-select-option
@@ -172,7 +172,7 @@
           <a-col :span="7">
             <a-select
                 class="select"
-                :value="add.targetSuperviseName"
+                :value="add.superviseTargetName"
                 @change="onAddSuperviseNameSelectChange"
             >
               <a-select-option
@@ -214,13 +214,13 @@
         <a-row>
           <a-col :span="5" class="left-txt">摄像头名称：</a-col>
           <a-col :span="7">
-            <a-input disabled="true" class="select" v-model="add.addInputName"></a-input>
+            <a-input :disabled="true" class="select" v-model="add.addInputName"></a-input>
           </a-col>
           <a-col :span="5" class="left-txt">监视物类型：</a-col>
           <a-col :span="7">
             <a-select
                 class="select"
-                :value="add.targetSuperviseTypeName"
+                :value="add.superviseTargetTypeName"
                 disabled/>
           </a-col>
         </a-row>
@@ -237,7 +237,7 @@
           <a-col :span="7">
             <a-select
                 class="select"
-                :value="add.targetSuperviseName"
+                :value="add.superviseTargetName"
                 disabled/>
           </a-col>
         </a-row>
@@ -245,11 +245,11 @@
         <a-row class="card-item">
           <a-col :span="5" class="left-txt">IP地址：</a-col>
           <a-col :span="7">
-            <a-input disabled="true" class="select" v-model="add.addInputIp"></a-input>
+            <a-input :disabled="true" class="select" v-model="add.addInputIp"></a-input>
           </a-col>
           <a-col :span="5" class="left-txt">摄像头位置：</a-col>
           <a-col :span="7">
-            <a-input disabled="true" class="select" v-model="add.addInputPosition"></a-input>
+            <a-input :disabled="true" class="select" v-model="add.addInputPosition"></a-input>
           </a-col>
         </a-row>
 
@@ -284,7 +284,7 @@
                 <a-progress :percent="videoConfig.brightness" size="small" :showInfo="false"/>
               </a-col>
               <a-col :span="4">
-                <a-input disabled="true" :value="videoConfig.brightness" class="percent-text"></a-input>
+                <a-input :disabled="true" :value="videoConfig.brightness" class="percent-text"></a-input>
               </a-col>
             </a-row>
 
@@ -295,7 +295,7 @@
                 <a-progress :percent="videoConfig.contrast" size="small" :showInfo="false"/>
               </a-col>
               <a-col :span="4">
-                <a-input disabled="true" :value="videoConfig.contrast" class="percent-text"></a-input>
+                <a-input :disabled="true" :value="videoConfig.contrast" class="percent-text"></a-input>
               </a-col>
             </a-row>
 
@@ -306,7 +306,7 @@
                 <a-progress :percent="videoConfig.saturation" size="small" :showInfo="false"/>
               </a-col>
               <a-col :span="4">
-                <a-input disabled="true" :value="videoConfig.saturation" class="percent-text"></a-input>
+                <a-input :disabled="true" :value="videoConfig.saturation" class="percent-text"></a-input>
               </a-col>
             </a-row>
           </div>
@@ -356,7 +356,7 @@
                               @percentChange="onBrightnessPercentChange"/>
               </a-col>
               <a-col :span="4">
-                <a-input disabled="true" :value="videoConfig.brightness" class="percent-text"></a-input>
+                <a-input :disabled="true" :value="videoConfig.brightness" class="percent-text"></a-input>
               </a-col>
             </a-row>
 
@@ -368,7 +368,7 @@
                               @percentChange="onContrastPercentChange"/>
               </a-col>
               <a-col :span="4">
-                <a-input disabled="true" :value="videoConfig.contrast" class="percent-text"></a-input>
+                <a-input :disabled="true" :value="videoConfig.contrast" class="percent-text"></a-input>
               </a-col>
             </a-row>
 
@@ -380,7 +380,7 @@
                               @percentChange="onSaturationPercentChange"/>
               </a-col>
               <a-col :span="4">
-                <a-input disabled="true" :value="videoConfig.saturation" class="percent-text"></a-input>
+                <a-input :disabled="true" :value="videoConfig.saturation" class="percent-text"></a-input>
               </a-col>
             </a-row>
             <a-col :span="19"></a-col>
@@ -411,7 +411,8 @@ import PageTitle from "@/components/PageTitle";
 function isNotEmpty(param) {
   return param && param != ''
 }
-const tableData=[];
+
+const tableData = [];
 const columns = [
   {
     title: '编号',
@@ -435,8 +436,8 @@ const columns = [
   },
   {
     title: '监视类型',
-    key: 'superviseTargetTypeName',
-    dataIndex: 'superviseTargetTypeName',
+    key: 'superviseTargetName',
+    dataIndex: 'superviseTargetName',
     align: 'center'
   },
   {
@@ -483,118 +484,6 @@ const columns = [
     align: 'center'
   }
 ];
-// const tableData = [
-//   // id	数据库自增ID	integer
-//   // deviceId	设备国标编号	string
-//   // name	设备名	string
-//   // superviseTargetType	监视物类型	integer
-//   // superviseTargetTypeName	监视物类型名称	string
-//   // superviseTargetId	监视物ID	integer
-//   // superviseTargetName	监视物名称	string
-//   // carriageNo	车厢号	integer
-//   // position	摄像机位置	string
-//   // ip	摄像机IP	string
-//   // online	摄像机在线状态, 0 离线, 1 在线	string
-//   // superviseTargetStatus	监视物状态, 0-正常，转向架异常（1-温度异常，2-检测到异物，3-部件缺失），受电弓姿态异常（100-降弓，101-升弓），受电弓实体异常（201-受电弓燃弧、202-受电弓异物、203-受电弓变形、204-右弓角缺失、205-左弓角缺失），受电弓温度异常（300-受电弓温度异常，statusText字段补充温度范围）	integer
-//   // superviseTargetStatusText 监视物状态描述
-//   {
-//     key: 1,
-//     number: 1,
-//     name: '摄像头01',
-//     model: '',
-//     superviseTargetType: 1,
-//     superviseTargetTypeName: '受电弓',
-//     superviseTargetId: 1,
-//     superviseTargetName: '受电弓1',
-//     carriageNo: 1,
-//     position: '受电弓位置01',
-//     ip: '192.168.1.1',
-//     onlineText: '在线',
-//     superviseTargetStatusText: '正常',
-//     operation: '',
-//   },
-//   {
-//     key: 2,
-//     number: 2,
-//     name: '摄像头02',
-//     model: '',
-//     superviseTargetType: 2,
-//     superviseTargetTypeName: '受电弓',
-//     superviseTargetId: 2,
-//     superviseTargetName: '受电弓2',
-//     carriageNo: 2,
-//     position: '受电弓位置01',
-//     ip: '192.168.1.2',
-//     onlineText: '在线',
-//     superviseTargetStatusText: '正常',
-//     operation: ''
-//   },
-//   {
-//     key: 3,
-//     number: 3,
-//     name: '摄像头03',
-//     model: '',
-//     superviseTargetType: 3,
-//     superviseTargetTypeName: '受电弓3',
-//     superviseTargetId: 3,
-//     superviseTargetName: '受电弓3',
-//     carriageNo: 3,
-//     position: '受电弓位置01',
-//     ip: '192.168.1.3',
-//     onlineText: '在线',
-//     superviseTargetStatusText: '正常',
-//     operation: ''
-//   },
-//   {
-//     key: 4,
-//     number: 4,
-//     name: '摄像头04',
-//     model: '',
-//     superviseTargetType: 4,
-//     superviseTargetTypeName: '受电弓4',
-//     superviseTargetId: 4,
-//     superviseTargetName: '受电弓4',
-//     carriageNo: 4,
-//     position: '受电弓位置01',
-//     ip: '192.168.1.4',
-//     onlineText: '在线',
-//     superviseTargetStatusText: '正常',
-//     operation: ''
-//   },
-//   {
-//     key: 5,
-//     number: 5,
-//     name: '摄像头05',
-//     model: '',
-//     superviseTargetType: 5,
-//     superviseTargetTypeName: '受电弓5',
-//     superviseTargetId: 5,
-//     superviseTargetName: '受电弓5',
-//     carriageNo: 5,
-//     position: '受电弓位置01',
-//     ip: '192.168.1.5',
-//     onlineText: '离线',
-//     superviseTargetStatusText: '异常',
-//     operation: ''
-//   },
-//   {
-//     key: 6,
-//     number: 6,
-//     name: '摄像头06',
-//     model: '',
-//     superviseTargetType: 6,
-//     superviseTargetTypeName: '受电弓6',
-//     superviseTargetId: 6,
-//     superviseTargetName: '受电弓6',
-//     carriageNo: 6,
-//     position: '受电弓位置01',
-//     ip: '192.168.1.6',
-//     onlineText: '在线',
-//     superviseTargetStatusText: '正常',
-//     operation: ''
-//   },
-//
-// ];
 
 export default {
   name: "CamInfo",
@@ -637,29 +526,19 @@ export default {
       isOffLineHasNextPage: true,
       /*   /api/device/query/devices请求参数    end   */
 
-      superviseTypeList: [
-          //假数据
-        //   {type: 4, name: '受电弓'},
-        // {type: 5, name: '转向架'},
-        // {type: 6, name: '车厢'}
-      ],
+      superviseTypeList: [],
       selectedRowRadioKeys: [],//所选中checkbox或radio的key
       sortedInfo: undefined,
       //添加摄像头相关数据
-      superviseList: [
-          //假数据
-        // {typeName: '受电弓', name: '受电弓1', carriageNo: 1, id: 1},
-        // {typeName: '转向架', name: '转向架2', carriageNo: 2, id: 2},
-        // {typeName: '车厢', name: '车厢3', carriageNo: 3, id: 3}
-      ],//监视物类型、监视物、所在车厢下拉选择框数据源
+      superviseList: [],//监视物类型、监视物、所在车厢下拉选择框数据源
       add: {
         addInputName: '',//input摄像头名称
         addInputIp: '',//inputIP
         addInputPosition: '',//input摄像头位置
-        targetSuperviseType: undefined,//监视物类型code
-        targetSuperviseTypeName: '',//监视物类型名称
-        targetSuperviseId: undefined,//监视物ID
-        targetSuperviseName: '',//监视物名称
+        superviseTargetType: undefined,//监视物类型code
+        superviseTargetTypeName: '',//监视物类型名称
+        superviseTargetId: undefined,//监视物ID
+        superviseTargetName: '',//监视物名称
         carriageNo: '',//所在车厢
         id: undefined,//该值对应值为数据库ID
         deviceId: undefined,//该值对应数值为设备国标ID
@@ -684,18 +563,12 @@ export default {
       request({
         url: '/api/supervise/type/list',
       }).then(res => {
-        //假数据
-        // res={
-        //   code:0,
-        //   data:[{type: 4, name: '受电弓'},],
-        //   message:"成功"
-        // }
         if (res.code == 0) {
           const resData = res.data;
           this.superviseTypeList = resData;
         }
       }).catch(err => {
-        this.$message.error(err.code+'!  '+err.message)
+        this.$message.error(err.code + '!  ' + err.message)
       })
     },
     getDevicesTableData() {
@@ -709,13 +582,13 @@ export default {
 
       const params = {};
       //必传参数
-      params.page = this.pagination.current ;
+      params.page = this.pagination.current;
       params.count = this.count;
       //非必传参数
       if (isNotEmpty(this.keyword)) {
         params.keyword = this.keyword;
       }
-      if (this.online!==undefined) {
+      if (this.online !== undefined) {
         params.online = this.online;
       }
       if (isNotEmpty(this.inputCarriageNo)) {
@@ -728,44 +601,6 @@ export default {
         url: '/api/device/query/devices',
         params,
       }).then(res => {
-            // // 假数据
-            // res = {
-            //   "code": 0,
-            //   "data": {
-            //     "endRow": 0,
-            //     "hasNextPage": false,
-            //     "hasPreviousPage": false,
-            //     "isFirstPage": true,
-            //     "isLastPage": true,
-            //     "list": [{
-            //       "carriageNo": 1,
-            //       "deviceId":'44010200491320000122',
-            //       "id":2,
-            //       "ip":'192.168.1.122',
-            //       "name": '192.168.1.122',
-            //       "online":'1',
-            //       "position": '车厢顶部',
-            //       "superviseTargetId": 1,
-            //       "superviseTargetTypeName": '1车厢受电弓',
-            //       "superviseTargetStatus":0,
-            //       "superviseTargetStatusText":'正常',
-            //       "superviseTargetType": 1,
-            //     }],
-            //     "navigateFirstPage": 0,
-            //     "navigateLastPage": 0,
-            //     "navigatePages": 8,
-            //     "navigatepageNums": [],
-            //     "nextPage": 0,
-            //     "pageNum": 1,
-            //     "pageSize": 0,
-            //     "pages": 0,
-            //     "prePage": 0,
-            //     "size": 0,
-            //     "startRow": 0,
-            //     "total": 0
-            //   },
-            //   "message": "成功"
-            // }
             try {
               if (res.code == 0) {
                 const resData = res.data;
@@ -778,35 +613,6 @@ export default {
                 } else {
                   this.isOfflineHasNextPage = resData.hasNextPage;
                 }
-                //表格中要求必须字段
-                // key: 6,
-                // number: 6,
-                // name: '摄像头06',
-                // model: '',
-                // superviseTargetType: 6,
-                // superviseTargetTypeName: '受电弓6',
-                // superviseTargetId: 6,
-                // superviseTargetName: '受电弓6',
-                // carriageNo: 6,
-                // position: '受电弓位置01',
-                // ip: '192.168.1.6',
-                // onlineText: '在线',
-                // superviseTargetStatusText: '正常',
-                // operation: ''
-
-                //接口返回数据结构
-                //       carriageNo: 1,
-                //       deviceId:'44010200491320000122',
-                //       id:2,
-                //       ip:'192.168.1.122',
-                //       name: '192.168.1.122',
-                //       online:'1',
-                //       position: '车厢顶部',
-                //       superviseTargetId: 1,
-                //       superviseTargetTypeName: '1车厢受电弓',
-                //       superviseTargetStatus:0,
-                //       superviseTargetStatusText:'正常',
-                //       superviseTargetType: 1,
 
                 for (let i = 1; i <= len; i++) {
                   const info = resTableData[i - 1];
@@ -827,7 +633,7 @@ export default {
             }
           }
       ).catch(err => {
-        this.$message.error(err.code+'!  '+err.message)
+        this.$message.error(err.code + '!  ' + err.message)
       })
     },
     getSuperviseList() {
@@ -843,32 +649,15 @@ export default {
         if (res.code == 0) {
           const resData = res.data;
           this.superviseList = resData;
-          //接口返回数据格式
-          // "id": 0,//id
-          // "name": "",//监视物名称
-          // "type": 0,//监视物类型
-          // "typeName": "",//监视物类型名称
-          // "carriageNo": 0,//监视物所在车厢
-          // "address": "",//安装位置
-          // "status": 0,//状态，0-正常，转向架异常（1-温度异常，2-检测到异物，3-部件缺失），受电弓姿态异常（100-降弓，101-升弓），受电弓实体异常（201-受电弓燃弧、202-受电弓异物、203-受电弓变形、204-右弓角缺失、205-左弓角缺失），受电弓温度异常（300-受电弓温度异常，statusText字段补充温度范围）
-          // "statusText": "",//安装位置
-          // "description": ""//描述
         }
       }).catch(err => {
-        this.$message.error(err.code+'!  '+err.message)
+        this.$message.error(err.code + '!  ' + err.message)
       })
     },
     onPaginationClicked(e) {
       this.pagination = e
     },
     refreshTable() {
-      // this.isAllActive = true;
-      // this.isOnlineActive = false;
-      // this.isOfflineActive = false;
-      // this.online = true;
-      // this.keyword = null;
-      // this.inputCarriageNo = null;
-      // this.selectedSuperviseType = {name: ''};
       this.tableData = [];
       this.pagination = {
         current: 1,
@@ -891,17 +680,17 @@ export default {
      */
     setAdd() {
       const selectedRowRadioKey = this.selectedRowRadioKeys[0];
-      if(this.tableData.length>0){
-      this.add.addInputName = this.tableData[selectedRowRadioKey - 1].name;//input显示用 //网络请求参数
-      this.add.addInputIp = this.tableData[selectedRowRadioKey - 1].ip;//input显示用 //网络请求参数
-      this.add.addInputPosition = this.tableData[selectedRowRadioKey - 1].position;//input显示用 //网络请求参数
-      this.add.targetSuperviseType = this.tableData[selectedRowRadioKey - 1].superviseTargetType;//网络请求参数
-      this.add.targetSuperviseTypeName = this.tableData[selectedRowRadioKey - 1].superviseTargetTypeName;//select显示用
-      this.add.targetSuperviseId = this.tableData[selectedRowRadioKey - 1].superviseTargetId//网络请求参数
-      this.add.targetSuperviseName = this.tableData[selectedRowRadioKey - 1].superviseTargetName//select显示用
-      this.add.carriageNo = this.tableData[selectedRowRadioKey - 1].carriageNo;//select显示用 //网络请求参数
-      this.add.id = this.tableData[selectedRowRadioKey - 1].id;//select显示用 //网络请求路径
-      this.add.deviceId=this.tableData[selectedRowRadioKey - 1].deviceId;
+      if (this.tableData.length > 0) {
+        this.add.addInputName = this.tableData[selectedRowRadioKey - 1].name;//input显示用 //网络请求参数
+        this.add.addInputIp = this.tableData[selectedRowRadioKey - 1].ip;//input显示用 //网络请求参数
+        this.add.addInputPosition = this.tableData[selectedRowRadioKey - 1].position;//input显示用 //网络请求参数
+        this.add.superviseTargetType = this.tableData[selectedRowRadioKey - 1].superviseTargetType;//网络请求参数
+        this.add.superviseTargetTypeName = this.tableData[selectedRowRadioKey - 1].superviseTargetTypeName;//select显示用
+        this.add.superviseTargetId = this.tableData[selectedRowRadioKey - 1].superviseTargetId//网络请求参数
+        this.add.superviseTargetName = this.tableData[selectedRowRadioKey - 1].superviseTargetName//select显示用
+        this.add.carriageNo = this.tableData[selectedRowRadioKey - 1].carriageNo;//select显示用 //网络请求参数
+        this.add.id = this.tableData[selectedRowRadioKey - 1].id;//select显示用 //网络请求路径
+        this.add.deviceId = this.tableData[selectedRowRadioKey - 1].deviceId;
       }
     },
     setAddVideoConfig(resData) {
@@ -912,10 +701,10 @@ export default {
       if (isNotEmpty(resData.name)) this.add.addInputName = resData.name;//input显示用 //网络请求参数
       if (isNotEmpty(resData.ip)) this.add.addInputIp = resData.ip;//input显示用 //网络请求参数
       if (isNotEmpty(resData.position)) this.add.addInputPosition = resData.position;//input显示用 //网络请求参数
-      if (isNotEmpty(resData.superviseTargetType)) this.add.targetSuperviseType = resData.superviseTargetType;//网络请求参数
-      if (isNotEmpty(resData.superviseTargetTypeName)) this.add.targetSuperviseTypeName = resData.superviseTargetTypeName;//select显示用
-      if (isNotEmpty(resData.superviseTargetId)) this.add.targetSuperviseId = resData.superviseTargetId//网络请求参数
-      if (isNotEmpty(resData.superviseTargetName)) this.add.targetSuperviseName = resData.superviseTargetName//select显示用
+      if (isNotEmpty(resData.superviseTargetType)) this.add.superviseTargetType = resData.superviseTargetType;//网络请求参数
+      if (isNotEmpty(resData.superviseTargetTypeName)) this.add.superviseTargetTypeName = resData.superviseTargetTypeName;//select显示用
+      if (isNotEmpty(resData.superviseTargetId)) this.add.superviseTargetId = resData.superviseTargetId//网络请求参数
+      if (isNotEmpty(resData.superviseTargetName)) this.add.superviseTargetName = resData.superviseTargetName//select显示用
       if (isNotEmpty(resData.carriageNo)) this.add.carriageNo = resData.carriageNo;//select显示用 //网络请求参数
       if (isNotEmpty(resData.deviceId)) this.add.id = resData.deviceId;//select显示用 //网络请求路径
       if (resData.videoConfig) {
@@ -943,10 +732,10 @@ export default {
       if (isNotEmpty(resData.name)) this.add.addInputName = resData.name;//input显示用 //网络请求参数
       if (isNotEmpty(resData.ip)) this.add.addInputIp = resData.ip;//input显示用 //网络请求参数
       if (isNotEmpty(resData.position)) this.add.addInputPosition = resData.position;//input显示用 //网络请求参数
-      if (isNotEmpty(resData.superviseTargetType)) this.add.targetSuperviseType = resData.superviseTargetType;//网络请求参数
-      if (isNotEmpty(resData.superviseTargetTypeName)) this.add.targetSuperviseTypeName = resData.superviseTargetTypeName;//select显示用
-      if (isNotEmpty(resData.superviseTargetId)) this.add.targetSuperviseId = resData.superviseTargetId//网络请求参数
-      if (isNotEmpty(resData.superviseTargetName)) this.add.targetSuperviseName = resData.superviseTargetName//select显示用
+      if (isNotEmpty(resData.superviseTargetType)) this.add.superviseTargetType = resData.superviseTargetType;//网络请求参数
+      if (isNotEmpty(resData.superviseTargetTypeName)) this.add.superviseTargetTypeName = resData.superviseTargetTypeName;//select显示用
+      if (isNotEmpty(resData.superviseTargetId)) this.add.superviseTargetId = resData.superviseTargetId//网络请求参数
+      if (isNotEmpty(resData.superviseTargetName)) this.add.superviseTargetName = resData.superviseTargetName//select显示用
       if (isNotEmpty(resData.carriageNo)) this.add.carriageNo = resData.carriageNo;//select显示用 //网络请求参数
       if (isNotEmpty(resData.id)) this.add.id = resData.id;
       if (isNotEmpty(resData.deviceId)) this.add.deviceId = resData.deviceId;
@@ -983,8 +772,8 @@ export default {
     },
     //添加设备modal"监视物类型"select
     onAddSuperviseTypeSelectChange(index, option) {
-      this.add.targetSuperviseTypeName = this.superviseTypeList[index].name;
-      this.add.targetSuperviseType = this.superviseTypeList[index].type;
+      this.add.superviseTargetTypeName = this.superviseTypeList[index].name;
+      this.add.superviseTargetType = this.superviseTypeList[index].type;
     },
     //添加设备modal"所在车厢"select
     onAddCarriageNoSelectChange(index, option) {
@@ -992,25 +781,25 @@ export default {
     },
     //添加设备modal"监视物(名称)"select
     onAddSuperviseNameSelectChange(index, option) {
-      this.add.targetSuperviseName = this.superviseList[index].name;
-      this.add.targetSuperviseId = this.superviseList[index].id;
+      this.add.superviseTargetName = this.superviseList[index].name;
+      this.add.superviseTargetId = this.superviseList[index].id;
     },
     /**
      * 将add{}、videoConfig{}、modalTitle、selectedRowRadioKeys重置
      */
     onModalClean() {
       //编辑摄像头modal中，点击"取消"应恢复至用户所选择设备信息，不应做清空设置
-      if(this.modalTitle==='编辑摄像头'){
+      if (this.modalTitle === '编辑摄像头') {
         this.setAdd()
         return;
       }
       this.add.addInputName = '';
       this.add.addInputIp = '';
       this.add.addInputPosition = '';
-      this.add.targetSuperviseType = undefined;
-      this.add.targetSuperviseTypeName = '';
-      this.add.targetSuperviseId = undefined;
-      this.add.targetSuperviseName = '';
+      this.add.superviseTargetType = undefined;
+      this.add.superviseTargetTypeName = '';
+      this.add.superviseTargetId = undefined;
+      this.add.superviseTargetName = '';
       this.add.carriageNo = '';
       this.add.id = undefined;
       this.add.deviceId = undefined;
@@ -1024,7 +813,7 @@ export default {
 
       this.selectedRowRadioKeys = [];//清空radio
 
-      this.modalTitle='';
+      this.modalTitle = '';
     },
     onAddModalCancel() {
       this.onModalClean();
@@ -1044,8 +833,8 @@ export default {
         if (isNotEmpty(this.add.deviceId)) params.deviceId = this.add.deviceId;
         if (isNotEmpty(this.add.addInputName)) params.name = this.add.addInputName;
 
-        if (isNotEmpty(this.add.targetSuperviseType)) params.superviseTargetType = this.add.targetSuperviseType;
-        if (isNotEmpty(this.add.targetSuperviseId)) params.superviseTargetId = this.add.targetSuperviseId;
+        if (isNotEmpty(this.add.superviseTargetType)) params.superviseTargetType = this.add.superviseTargetType;
+        if (isNotEmpty(this.add.superviseTargetId)) params.superviseTargetId = this.add.superviseTargetId;
         if (isNotEmpty(this.add.carriageNo)) params.carriageNo = this.add.carriageNo;
         if (isNotEmpty(this.add.addInputPosition)) params.position = this.add.addInputPosition;
         request({
@@ -1056,13 +845,13 @@ export default {
           if (res.code == 0) {
             this.onAddModalCancel();
             this.refreshTable();
-          }else{
+          } else {
             this.onAddModalCancel();
-            this.$message.error(res.code+'!  '+res.message)
+            this.$message.error(res.code + '!  ' + res.message)
           }
         }).catch(err => {
           this.onAddModalCancel();
-          this.$message.error(err.code+'!  '+err.message)
+          this.$message.error(err.code + '!  ' + err.message)
         })
       } else {
         this.$message.warn('IP不能为空！')
@@ -1099,7 +888,7 @@ export default {
         this.addModalVisible = true;
       }
       //modal显示后再加载"监视物类型"，"所在车厢"、"监视物"select数据
-      if(this.addModalVisible){
+      if (this.addModalVisible) {
         this.getSuperviseTypeList();//"监视物类型"
         this.getSuperviseList();//"所在车厢"、"监视物"
       }
@@ -1118,15 +907,15 @@ export default {
           url: '/api/device/query/devices/' + this.add.id + '/delete',
           method: 'delete',
         }).then(res => {
-          if (res.code == 200) {
+          if (res.code == 0) {
             this.onModalClean();
             this.refreshTable();
-          }else{
-            this.$message.error(res.message);
+          } else {
+            this.$message.error(res.code + "! " + res.message);
           }
         }).catch(err => {
           this.onModalClean();
-          this.$message.error(err.code+'!  '+err.message)
+          this.$message.error(err.code + '!  ' + err.message)
         })
       }
       this.popconfirmVisiable = false;
@@ -1147,13 +936,13 @@ export default {
       this.camInfoModalVisible = true;
       request({
         url: '/api/device/query/devices/' + this.add.id,
-        method:'get'
+        method: 'get'
       }).then(res => {
         if (res.code == 0) {
           this.setViewVideoConfig(res.data)
         }
       }).catch(err => {
-        this.$message.error(err.code+'!  '+err.message)
+        this.$message.error(err.code + '!  ' + err.message)
 
       })
     },
@@ -1179,7 +968,7 @@ export default {
           this.refreshTable();
         }
       }).catch(err => {
-        this.$message.error(err.code+'!  '+err.message)
+        this.$message.error(err.code + '!  ' + err.message)
       })
     },
     onBrightnessPercentChange(per) {
@@ -1205,7 +994,7 @@ export default {
           this.setEditVideoConfig(res.data)
         }
       }).catch(err => {
-        this.$message.error(err.code+'!  '+err.message)
+        this.$message.error(err.code + '!  ' + err.message)
       })
     },
     /**
@@ -1221,7 +1010,7 @@ export default {
      * 重置视频配置信息
      * 视频图像设置modal中"恢复默认值"、"重置"按钮都使用该方法
      */
-    resetVideoConfig(){
+    resetVideoConfig() {
       request({
         url: 'api/device/query/videoConfig/' + this.add.deviceId + '/reset',
         method: 'put',
@@ -1230,7 +1019,7 @@ export default {
           this.$message.info(res.data);
         }
       }).catch(err => {
-        this.$message.error(err.code+'!  '+err.message)
+        this.$message.error(err.code + '!  ' + err.message)
       })
     },
     onVideoConfigCancelBtnClicked() {
@@ -1255,7 +1044,7 @@ export default {
           this.$message.info('更新视频配置信息成功');
         }
       }).catch(err => {
-        this.$message.error(err.code+'!  '+err.message)
+        this.$message.error(err.code + '!  ' + err.message)
       })
     },
 
