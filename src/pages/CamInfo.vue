@@ -684,6 +684,12 @@ export default {
       request({
         url: '/api/supervise/type/list',
       }).then(res => {
+        //假数据
+        // res={
+        //   code:0,
+        //   data:[{type: 4, name: '受电弓'},],
+        //   message:"成功"
+        // }
         if (res.code == 0) {
           const resData = res.data;
           this.superviseTypeList = resData;
@@ -828,6 +834,12 @@ export default {
       request({
         url: '/api/supervise/list',
       }).then(res => {
+        //假数据
+        // res={
+        //   code:0,
+        //   data:[{address:'车厢顶部',carriageNo: 1, id: 1, name: '受电弓1',status:0,statusText:'正常',type:2,typeName: '受电弓',description:''},],
+        //   message:"成功"
+        // }
         if (res.code == 0) {
           const resData = res.data;
           this.superviseList = resData;
@@ -1044,6 +1056,9 @@ export default {
           if (res.code == 0) {
             this.onAddModalCancel();
             this.refreshTable();
+          }else{
+            this.onAddModalCancel();
+            this.$message.error(res.code+'!  '+res.message)
           }
         }).catch(err => {
           this.onAddModalCancel();
