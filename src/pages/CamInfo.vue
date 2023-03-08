@@ -36,8 +36,7 @@
           <a-button :class="{active:isOfflineActive}" @click="changeBtnAcive(0)">离线</a-button>
         </a-col>
         <a-col :span="2" class="left-txt">关键字：</a-col>
-        <a-col :span="7">
-          <a-input v-model="keyword" placeholder="请输入关键字" :maxLength="60"></a-input>
+        <a-col :span="7"><a-input v-model="keyword" placeholder="请输入关键字（不超过60字）" :maxLength="60"></a-input>
         </a-col>
         <a-col :span="6"></a-col>
         <a-col :span="2">
@@ -145,7 +144,7 @@
                 @change="onAddSuperviseTypeSelectChange"
             >
               <a-select-option
-                  v-for="(item,index) of superviseTypeList"
+                  v-for="(item,index) of add.superviseTypeArr"
                   :key="index">
                 {{ item.name }}
               </a-select-option>
@@ -161,10 +160,10 @@
                 :value="add.carriageNo+''"
                 @change="onAddCarriageNoSelectChange">
               <a-select-option
-                  v-for="(item,index) of superviseList"
+                  v-for="(item,index) of add.carriageNoArr"
                   :key="index"
               >
-                {{ item.carriageNo }}
+                {{ item }}
               </a-select-option>
             </a-select>
           </a-col>
@@ -176,7 +175,7 @@
                 @change="onAddSuperviseNameSelectChange"
             >
               <a-select-option
-                  v-for="(item,index) of superviseList"
+                  v-for="(item,index) of add.superviseArr"
                   :key="index"
               >
                 {{ item.name }}
@@ -526,22 +525,27 @@ export default {
       isOffLineHasNextPage: true,
       /*   /api/device/query/devices请求参数    end   */
 
-      superviseTypeList: [],
       selectedRowRadioKeys: [],//所选中checkbox或radio的key
       sortedInfo: undefined,
-      //添加摄像头相关数据
-      superviseList: [],//监视物类型、监视物、所在车厢下拉选择框数据源
+
+      superviseTypeList: [],
+      superviseList: [],
+
       add: {
         addInputName: '',//input摄像头名称
         addInputIp: '',//inputIP
         addInputPosition: '',//input摄像头位置
-        superviseTargetType: undefined,//监视物类型code
-        superviseTargetTypeName: '',//监视物类型名称
-        superviseTargetId: undefined,//监视物ID
-        superviseTargetName: '',//监视物名称
+        superviseTargetType: undefined,//监视物类型code 用于网络请求接口参数
+        superviseTargetTypeName: '',//监视物类型名称 用于select显示
+        superviseTargetId: undefined,//监视物ID 用于网络请求接口参数
+        superviseTargetName: '',//监视物名称 用于select显示
         carriageNo: '',//所在车厢
         id: undefined,//该值对应值为数据库ID
         deviceId: undefined,//该值对应数值为设备国标ID
+
+        superviseTypeArr: [],//数据为{type:1,name:''}
+        superviseArr: [],//数据为{address:'车厢顶部',carriageNo: 1, id: 1, name: '受电弓1',status:0,statusText:'正常',type:2,typeName: '受电弓',description:''}
+        carriageNoArr: []//数据为number
       },
       videoConfig: {
         encoder: 'H.264',
@@ -555,22 +559,6 @@ export default {
     }
   },
   methods: {
-    /**
-     * 获取监视物类型列表
-     * 数据作为页面中"监视类型"select数据源
-     */
-    getSuperviseTypeList() {
-      request({
-        url: '/api/supervise/type/list',
-      }).then(res => {
-        if (res.code == 0) {
-          const resData = res.data;
-          this.superviseTypeList = resData;
-        }
-      }).catch(err => {
-        this.$message.error(err.code + '!  ' + err.message)
-      })
-    },
     getDevicesTableData() {
       //判断后端是否有新数据，无新数据则不进行网络请求
       // if (this.online && !this.isOnlineHasNextPage) {
@@ -601,6 +589,44 @@ export default {
         url: '/api/device/query/devices',
         params,
       }).then(res => {
+            // 假数据
+            // res = {
+            //   "code": 0,
+            //   "data": {
+            //     "endRow": 0,
+            //     "hasNextPage": false,
+            //     "hasPreviousPage": false,
+            //     "isFirstPage": true,
+            //     "isLastPage": true,
+            //     "list": [{
+            //       "carriageNo": 1,
+            //       "deviceId": '44010200491320000122',
+            //       "id": 2,
+            //       "ip": '192.168.1.122',
+            //       "name": '192.168.1.122',
+            //       "online": '1',
+            //       "position": '车厢顶部',
+            //       "superviseTargetId": 1,
+            //       "superviseTargetName": '1车厢受电弓',
+            //       "superviseTargetStatus": 0,
+            //       "superviseTargetStatusText": '正常',
+            //       "superviseTargetType": 1,
+            //     }],
+            //     "navigateFirstPage": 0,
+            //     "navigateLastPage": 0,
+            //     "navigatePages": 8,
+            //     "navigatepageNums": [],
+            //     "nextPage": 0,
+            //     "pageNum": 1,
+            //     "pageSize": 0,
+            //     "pages": 0,
+            //     "prePage": 0,
+            //     "size": 0,
+            //     "startRow": 0,
+            //     "total": 0
+            //   },
+            //   "message": "成功"
+            // }
             try {
               if (res.code == 0) {
                 const resData = res.data;
@@ -636,6 +662,29 @@ export default {
         this.$message.error(err.code + '!  ' + err.message)
       })
     },
+    /**
+     * 获取监视物类型列表
+     * 数据作为页面中"监视类型"select数据源
+     * @param flag true->表示添加、编辑modal中进行数据请求 不传值或false->表示主页面中请求数据
+     */
+    getSuperviseTypeList(flag) {
+      request({
+        url: '/api/supervise/type/list',
+      }).then(res => {
+        if (res.code == 0) {
+          const resData = res.data;
+          this.superviseTypeList = resData;
+          if (flag) {
+            this.setSuperviseTypeArr();
+          }
+        } else {
+          this.$message.error(res.code + '! ' + res.message)
+        }
+      }).catch(err => {
+        this.$message.error(err.code + '!  ' + err.message)
+      })
+    },
+
     getSuperviseList() {
       request({
         url: '/api/supervise/list',
@@ -649,11 +698,16 @@ export default {
         if (res.code == 0) {
           const resData = res.data;
           this.superviseList = resData;
+          this.setSuperviseArr();
+          this.setCarriageNoArr();
+        } else {
+          this.$message.error(res.code + '!  ' + res.message)
         }
       }).catch(err => {
         this.$message.error(err.code + '!  ' + err.message)
       })
     },
+
     onPaginationClicked(e) {
       this.pagination = e
     },
@@ -770,22 +824,84 @@ export default {
       this.selectedSuperviseType = {name: ''};
       this.changeBtnAcive(-1);
     },
+
+    setSuperviseTypeArr() {
+      this.add.superviseTypeArr = this.superviseTypeList;
+    },
+    /**
+     *
+     * @param superviseType 监视物类型对应的code值
+     */
+    setSuperviseArr(superviseType, carriageNo) {
+      if (superviseType || carriageNo) {
+        //当选择了监视物类型或车厢后，监视物内容清空
+        this.add.superviseTargetName = '';
+        this.add.superviseTargetId = undefined;
+        this.add.superviseArr = [];
+        if (superviseType) {//当选择了监视物类型后，选择对应superviseType的数据
+          this.add.superviseArr = this.superviseList.filter(item => item.type == superviseType);
+          //若车厢已选择，进一步过滤
+          if (this.add.carriageNo) {
+            this.add.superviseArr = this.add.superviseArr.filter(item => item.carriageNo == this.add.carriageNo);
+            if (this.add.superviseArr.length < 1) {
+              this.$message.warn('同时满足所选监视类型及车厢号的监视物不存在，请重新选择车监视类型、车厢')
+            }
+          }
+        }
+        if (carriageNo) {//当选择了车厢后，选择对应superviseType的数据
+          this.add.superviseArr = this.superviseList.filter(item => item.carriageNo == carriageNo);
+          //若监视类型已选择，进一步过滤
+          if (this.add.superviseTargetType) {
+            this.add.superviseArr = this.add.superviseArr.filter(item => item.superviseTargetName == this.add.superviseTargetType);
+            if (this.add.superviseArr.length < 1) {
+              this.$message.warn('同时满足所选监视类型及车厢号的监视物不存在，请重新选择车监视类型、车厢')
+            }
+          }
+
+        }
+      } else {//网络请求后或点击清空按钮
+        this.add.superviseArr = this.superviseList
+      }
+    },
+    /**
+     * //网络请求后或点击清空按钮
+     */
+    setCarriageNoArr() {
+      this.add.carriageNoArr = [];
+      //使用一个map过滤重复的carriageNo
+      let tempMap = new Map();
+      this.superviseList.forEach(item => {
+        tempMap.set(item.carriageNo, item)
+      })
+      for (let [key, value] of tempMap.entries()) {
+        this.add.carriageNoArr.push(key);
+      }
+    },
     //添加设备modal"监视物类型"select
     onAddSuperviseTypeSelectChange(index, option) {
-      this.add.superviseTargetTypeName = this.superviseTypeList[index].name;
-      this.add.superviseTargetType = this.superviseTypeList[index].type;
+      this.add.superviseTargetTypeName = this.add.superviseTypeArr[index].name;
+      this.add.superviseTargetType = this.add.superviseTypeArr[index].type;
+      //根据用户选择的监视物，来确定监视物数据
+      this.setSuperviseArr(this.add.superviseTargetType);
     },
     //添加设备modal"所在车厢"select
     onAddCarriageNoSelectChange(index, option) {
-      this.add.carriageNo = this.superviseList[index].carriageNo;
+      this.add.carriageNo = this.add.carriageNoArr[index];
+
+      //根据用户选择的车厢，来确定监视物数据
+      this.setSuperviseArr(undefined, this.add.carriageNo);
     },
     //添加设备modal"监视物(名称)"select
     onAddSuperviseNameSelectChange(index, option) {
-      this.add.superviseTargetName = this.superviseList[index].name;
-      this.add.superviseTargetId = this.superviseList[index].id;
+      this.add.superviseTargetName = this.add.superviseArr[index].name;
+      this.add.superviseTargetId = this.add.superviseArr[index].id;
+      //根据用户最终选择监视物，来确定监视物类型、车厢
+      this.add.superviseTargetTypeName = this.add.superviseArr[index].typeName;
+      this.add.superviseTargetType = this.add.superviseArr[index].type;
+      this.add.carriageNo = this.add.superviseArr[index].carriageNo;
     },
     /**
-     * 将add{}、videoConfig{}、modalTitle、selectedRowRadioKeys重置
+     * 将add{}、videoConfig{}、selectedRowRadioKeys重置
      */
     onModalClean() {
       //编辑摄像头modal中，点击"取消"应恢复至用户所选择设备信息，不应做清空设置
@@ -813,11 +929,16 @@ export default {
 
       this.selectedRowRadioKeys = [];//清空radio
 
-      this.modalTitle = '';
+      //三个select数据源回归至最初数据源
+      this.setSuperviseTypeArr();
+      this.setSuperviseArr();
+      this.setCarriageNoArr();
     },
     onAddModalCancel() {
-      this.onModalClean();
       this.addModalVisible = false;
+      this.modalTitle = '';
+      this.onModalClean();
+
     },
     onAddModalConfirm() {
       if (this.add.addInputIp && this.add.addInputIp !== '') {
@@ -889,7 +1010,7 @@ export default {
       }
       //modal显示后再加载"监视物类型"，"所在车厢"、"监视物"select数据
       if (this.addModalVisible) {
-        this.getSuperviseTypeList();//"监视物类型"
+        this.getSuperviseTypeList(true);//"监视物类型"
         this.getSuperviseList();//"所在车厢"、"监视物"
       }
     },
@@ -1017,6 +1138,8 @@ export default {
       }).then(res => {
         if (res.code == 0) {
           this.$message.info(res.data);
+        }else{
+          this.$message.error(res.code+'! '+res.message)
         }
       }).catch(err => {
         this.$message.error(err.code + '!  ' + err.message)
@@ -1042,6 +1165,8 @@ export default {
         if (res.code == 0) {
           this.videoConfigModalVisible = false;
           this.$message.info('更新视频配置信息成功');
+        }else{
+          this.$message.error(res.code+'! '+res.message)
         }
       }).catch(err => {
         this.$message.error(err.code + '!  ' + err.message)
