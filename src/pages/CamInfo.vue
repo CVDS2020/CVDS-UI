@@ -673,6 +673,11 @@ export default {
       }).then(res => {
         if (res.code == 0) {
           const resData = res.data;
+          // const resData=[
+          //   {name:'转向架',type:1},
+          //   {name:'受电弓',type:2},
+          //   {name:'车厢',type:3},
+          // ]
           this.superviseTypeList = resData;
           if (flag) {
             this.setSuperviseTypeArr();
@@ -689,14 +694,14 @@ export default {
       request({
         url: '/api/supervise/list',
       }).then(res => {
-        //假数据
-        // res={
-        //   code:0,
-        //   data:[{address:'车厢顶部',carriageNo: 1, id: 1, name: '受电弓1',status:0,statusText:'正常',type:2,typeName: '受电弓',description:''},],
-        //   message:"成功"
-        // }
         if (res.code == 0) {
           const resData = res.data;
+          // const resData=[
+          //   {address:'车厢顶部',carriageNo: 1, id: 1, name: '转向架1',status:0,statusText:'正常',type:1,typeName: '转向架',description:''},
+          //   {address:'车厢顶部',carriageNo: 1, id: 2, name: '受电弓1',status:0,statusText:'正常',type:2,typeName: '受电弓',description:''},
+          //   {address:'车厢顶部',carriageNo: 2, id: 3, name: '车厢1',status:0,statusText:'正常',type:3,typeName: '车厢',description:''},
+          //   {address:'车厢顶部',carriageNo: 3, id: 4, name: '转向架2',status:0,statusText:'正常',type:1,typeName: '转向架',description:''},
+          // ]
           this.superviseList = resData;
           this.setSuperviseArr();
           this.setCarriageNoArr();
@@ -841,7 +846,7 @@ export default {
         if (superviseType) {//当选择了监视物类型后，选择对应superviseType的数据
           this.add.superviseArr = this.superviseList.filter(item => item.type == superviseType);
           //若车厢已选择，进一步过滤
-          if (this.add.carriageNo) {
+          if (isNotEmpty(this.add.carriageNo)) {
             this.add.superviseArr = this.add.superviseArr.filter(item => item.carriageNo == this.add.carriageNo);
             if (this.add.superviseArr.length < 1) {
               this.$message.warn('同时满足所选监视类型及车厢号的监视物不存在，请重新选择车监视类型、车厢')
@@ -851,8 +856,8 @@ export default {
         if (carriageNo) {//当选择了车厢后，选择对应superviseType的数据
           this.add.superviseArr = this.superviseList.filter(item => item.carriageNo == carriageNo);
           //若监视类型已选择，进一步过滤
-          if (this.add.superviseTargetType) {
-            this.add.superviseArr = this.add.superviseArr.filter(item => item.superviseTargetName == this.add.superviseTargetType);
+          if (isNotEmpty(this.add.superviseTargetType)) {
+            this.add.superviseArr = this.add.superviseArr.filter(item => item.type == this.add.superviseTargetType);
             if (this.add.superviseArr.length < 1) {
               this.$message.warn('同时满足所选监视类型及车厢号的监视物不存在，请重新选择车监视类型、车厢')
             }
@@ -864,7 +869,7 @@ export default {
       }
     },
     /**
-     * //网络请求后或点击清空按钮
+     * 网络请求后或点击清空按钮使用该方法
      */
     setCarriageNoArr() {
       this.add.carriageNoArr = [];
